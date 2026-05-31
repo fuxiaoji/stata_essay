@@ -1,0 +1,141 @@
+-------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Users/Zhuanz1/Desktop/code/stata_essay/Data_done/03_logs/build_an
+> alysis_data.log
+  log type:  text
+ opened on:  31 May 2026, 14:55:17
+
+. 
+. use "$RAW", clear
+
+. 
+. capture confirm variable year
+
+. if _rc == 0 {
+.     keep if year == 2022
+(0 observations deleted)
+. }
+
+. else {
+.     gen year = 2022
+. }
+
+. 
+. gen age2 = age_^2 if !missing(age_)
+
+. label variable age_ "Respondent age"
+
+. label variable age2 "Respondent age squared"
+
+. 
+. gen lnwage = ln(wage + 1) if wage >= 0 & !missing(wage)
+(4,934 missing values generated)
+
+. label variable lnwage "Log individual wage income ln(wage+1)"
+
+. 
+. keep if inrange(age_, 18, 64)
+(1,831 observations deleted)
+
+. keep if !missing(wage)
+(3,257 observations deleted)
+
+. 
+. egen miss_core = rowmiss(lnwage educ age_ age2 gen mar rural medsure_dum prov
+> cd)
+
+. keep if miss_core == 0
+(19 observations deleted)
+
+. drop miss_core
+
+. 
+. keep pid year provcd age_ age2 gen mar rural medsure_dum edu educ wage lnwage
+>  inc1 job
+
+. order pid year provcd age_ age2 gen mar rural medsure_dum edu educ wage lnwag
+> e inc1 job
+
+. 
+. assert year == 2022
+
+. assert inrange(age_, 18, 64)
+
+. assert !missing(lnwage, educ, age2, gen, mar, rural, medsure_dum, provcd)
+
+. 
+. compress
+  variable year was float now int
+  variable age_ was float now byte
+  variable age2 was float now int
+  variable medsure_dum was float now byte
+  variable job was float now byte
+  variable provcd was double now byte
+  variable gen was double now byte
+  variable mar was double now byte
+  variable rural was double now byte
+  variable edu was double now byte
+  variable educ was double now byte
+  (258,445 bytes saved)
+
+. save "$WORK/analysis.dta", replace
+file /Users/Zhuanz1/Desktop/code/stata_essay/Data_done/01_data/analysis.dta
+    saved
+
+. save "$WORK/cfps2022_education_income_analysis.dta", replace
+file
+    /Users/Zhuanz1/Desktop/code/stata_essay/Data_done/01_data/cfps2022_educat
+    > ion_income_analysis.dta saved
+
+. 
+. describe
+
+Contains data from /Users/Zhuanz1/Desktop/code/stata_essay/Data_done/01_data/cf
+> ps2022_education_income_analysis.dta
+ Observations:         4,699                  
+    Variables:            15                  31 May 2026 14:55
+-------------------------------------------------------------------------------
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+-------------------------------------------------------------------------------
+pid             double  %12.0g     resp1pid   财务回答人
+year            int     %9.0g                 
+provcd          byte    %24.0g     provcd22   2022年省国标码
+age_            byte    %9.0g                 Respondent age
+age2            int     %9.0g                 Respondent age squared
+gen             byte    %9.0g                 性别 1=男 0=女
+mar             byte    %9.0g                 婚姻状况 1=有配偶 0= 无配偶
+rural           byte    %9.0g                 户口性质 1=农业户口 0=非农户口
+medsure_dum     byte    %9.0g                 是否购买医保
+edu             byte    %16.0g     edu        受教育程度 0=文盲/半文盲 1=小学
+                                                2=初中 4=高中/中专/技校/职高
+                                                5=大专 6=大学本科 7=硕士 8=博士
+educ            byte    %9.0g                 受教育年限 受教育程度
+                                                0=文盲/半文盲 6=小学 9=初中
+                                                12=高中/中专/技校/职高 15=大专
+                                                16=大学本科 19=硕士 22=博士
+wage            float   %9.0g                 
+lnwage          float   %9.0g                 Log individual wage income
+                                                ln(wage+1)
+inc1            float   %9.0g                 人均家庭纯收入
+job             byte    %9.0g                 
+-------------------------------------------------------------------------------
+Sorted by: 
+
+. summarize wage lnwage educ age_ age2
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+        wage |      4,699    60594.13    68985.46          0    1800000
+      lnwage |      4,699     10.4892    1.567103          0    14.4033
+        educ |      4,699    11.00617    4.376463          0         22
+        age_ |      4,699    40.86678    10.92073         18         64
+        age2 |      4,699    1789.331    919.7751        324       4096
+
+. log close
+      name:  <unnamed>
+       log:  /Users/Zhuanz1/Desktop/code/stata_essay/Data_done/03_logs/build_an
+> alysis_data.log
+  log type:  text
+ closed on:  31 May 2026, 14:55:17
+-------------------------------------------------------------------------------

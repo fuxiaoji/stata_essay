@@ -1,0 +1,26 @@
+-------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Users/Zhuanz1/Desktop/code/stata_essay/Data_done/03_logs/export_a
+> nalysis_csv.log
+  log type:  text
+ opened on:  31 May 2026, 14:55:23
+
+. 
+. use "$WORK/analysis.dta", clear
+
+. export delimited using "$WORK/analysis.csv", replace nolabel
+file /Users/Zhuanz1/Desktop/code/stata_essay/Data_done/01_data/analysis.csv sav
+> ed
+
+. 
+. display as text "Analysis CSV exported to $WORK/analysis.csv"
+Analysis CSV exported to /Users/Zhuanz1/Desktop/code/stata_essay/Data_done/01_d
+> ata/analysis.csv
+
+. log close
+      name:  <unnamed>
+       log:  /Users/Zhuanz1/Desktop/code/stata_essay/Data_done/03_logs/export_a
+> nalysis_csv.log
+  log type:  text
+ closed on:  31 May 2026, 14:55:23
+-------------------------------------------------------------------------------

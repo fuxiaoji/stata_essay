@@ -1,0 +1,135 @@
+\documentclass[12pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{natbib}
+\usepackage{amsmath}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  citecolor=blue,
+  urlcolor=blue
+}
+
+\onehalfspacing
+
+\title{Does Education Raise Adult Income in China?\\Evidence from CFPS 2022}
+\author{Empirical Essay}
+\date{May 31, 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This paper examines the association between education and income among working-age adults in China using the CFPS 2022 analytic sample. The sample is restricted to adults aged 18--64 with non-missing wage income and core covariates, yielding 4,699 observations. The main dependent variable is $\ln(\mathrm{wage}+1)$, and the key explanatory variable is years of education. Ordinary least squares models with robust standard errors are estimated sequentially with demographic controls and province fixed effects. The preferred specification estimates an education coefficient of 0.0882, significant at the 1 percent level, implying that one additional year of schooling is associated with roughly 8.8 percent higher wage income, conditional on observed controls. Robustness checks using education categories, an alternative household-income outcome, and a positive-wage subsample preserve the positive association. Because the design relies on cross-sectional observational data, the estimates should be interpreted as conditional associations rather than strict causal effects.
+\end{abstract}
+
+\noindent\textbf{Keywords:} education, income, CFPS, China, Mincer equation, returns to schooling
+
+\section{Introduction}
+
+Education is central to modern labor-market inequality because it can raise productive skills, improve job matching, and expand access to higher-paying occupations. The human-capital tradition treats schooling as an investment that can increase future earnings \citep{becker1964human, mincer1974schooling}. At the same time, estimating the effect of education is empirically difficult because schooling choices are correlated with family background, ability, location, and labor-market opportunities \citep{card1999causal, angrist1991compulsory}.
+
+This paper asks a focused empirical question: in the CFPS 2022 adult sample, is higher education associated with higher income after controlling for observable demographic and regional differences? The answer is yes. The preferred model shows a large and statistically precise positive association between years of education and log wage income. The analysis, however, is intentionally cautious about interpretation: the results document a robust conditional correlation, not a causal return to schooling.
+
+\section{Literature}
+
+The empirical specification follows the Mincerian earnings-function framework, in which log earnings are modeled as a function of schooling and labor-market experience \citep{mincer1974schooling}. Human-capital theory provides the economic mechanism behind this relationship: schooling may raise earnings by increasing skills and productivity \citep{becker1964human}. Later work emphasizes that OLS estimates may be biased if unobserved ability or family background affects both education and earnings; quasi-experimental approaches are therefore important for causal interpretation \citep{card1999causal, angrist1991compulsory, heckman2008earnings}.
+
+Evidence from China also finds substantial education-income gradients, especially during market-oriented reforms. \citet{zhang2005urban} document rising economic returns to schooling in urban China from 1988 to 2001. This paper contributes a compact update using CFPS 2022 microdata, a nationally oriented survey whose sampling design is documented by \citet{xie2015sampling}.
+
+\section{Data and Variables}
+
+The analysis uses CFPS 2022 data from the Institute of Social Science Survey at Peking University \citep{cfps2022data}. The sample keeps 2022 respondents aged 18--64, requires non-missing wage income, and drops observations missing the main outcome, education, demographic controls, medical-insurance indicator, or province code. The final analytic sample contains 4,699 observations.
+
+The dependent variable is $\ln(\mathrm{wage}+1)$, where wage is annual individual wage income. The core explanatory variable is years of education. Controls include age, age squared, gender, marital status, rural hukou, medical insurance, and province fixed effects. Table~\ref{tab:desc} reports descriptive statistics, and Table~\ref{tab:edu} reports the education composition of the analytic sample.
+
+\begin{table}[H]
+\centering
+\caption{Descriptive Statistics}
+\label{tab:desc}
+\input{tables/table_descriptive_statistics.tex}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Education Distribution}
+\label{tab:edu}
+\input{tables/table_education_distribution.tex}
+\end{table}
+
+\section{Empirical Strategy}
+
+The baseline model is
+\begin{equation}
+\ln(\mathrm{wage}_i+1)=\alpha+\beta\,\mathrm{educ}_i+\gamma X_i+\mu_p+\varepsilon_i,
+\end{equation}
+where $\mathrm{educ}_i$ is years of education, $X_i$ contains individual controls, and $\mu_p$ denotes province fixed effects. Robust standard errors are used throughout. Three baseline specifications are estimated: a bivariate model, a model adding demographic controls, and a preferred model adding province fixed effects. Robustness checks replace the income outcome with $\ln(\mathrm{inc1}+1)$ and restrict the sample to respondents with positive wage income.
+
+\section{Results}
+
+Figure~\ref{fig:distribution} shows that junior-high, high-school, college, and bachelor's groups account for most of the analytic sample. Figure~\ref{fig:wageedu} displays a clear upward gradient in mean log wage income across education categories. The same pattern appears when education is represented as years of schooling in Figure~\ref{fig:fit}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/viz_education_distribution.png}
+\caption{Education composition of the analytic sample}
+\label{fig:distribution}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/viz_wage_by_education.png}
+\caption{Mean log wage income by education category}
+\label{fig:wageedu}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/viz_binned_education_wage_fit.png}
+\caption{Binned education-wage gradient}
+\label{fig:fit}
+\end{figure}
+
+Table~\ref{tab:reg} presents the main regression estimates. The preferred specification with demographic controls and province fixed effects estimates an education coefficient of 0.0882 with a robust standard error of 0.0062. The coefficient is significant at the 1 percent level. Interpreted approximately, one additional year of education is associated with about 8.8 percent higher wage income, conditional on the included controls.
+
+\begin{table}[H]
+\centering
+\caption{Education Coefficients Across Specifications}
+\label{tab:reg}
+\input{tables/table_regression_education_returns.tex}
+\begin{flushleft}
+\footnotesize Notes: Robust standard errors are in parentheses. M1 includes only years of education. M2 adds demographic controls. M3 adds province fixed effects. Alt. income uses $\ln(\mathrm{inc1}+1)$ as the dependent variable. Positive wage restricts the sample to wage $>0$. $^{*}p<0.10$, $^{**}p<0.05$, $^{***}p<0.01$.
+\end{flushleft}
+\end{table}
+
+Figure~\ref{fig:coef} summarizes the education coefficients and their 95 percent robust confidence intervals. The positive association remains stable after adding controls and remains positive in both robustness checks. The alternative household-income outcome produces a smaller coefficient of 0.0728, while the positive-wage subsample gives 0.0788.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/viz_regression_coefficients.png}
+\caption{Education-income association across specifications}
+\label{fig:coef}
+\end{figure}
+
+\section{Discussion and Limitations}
+
+The results are consistent with human-capital theory and with prior evidence that education is strongly associated with earnings in China. The magnitude is economically meaningful: a several-year difference in schooling corresponds to a sizable predicted difference in wage income. The inclusion of province fixed effects reduces concerns that the estimate is driven solely by broad regional wage differences.
+
+Nevertheless, the analysis has important limitations. First, the data are cross-sectional, so unobserved ability, parental background, school quality, industry, occupation, and migration history may still confound the estimate. Second, annual wage income is skewed, and the log transformation with $+1$ handles zero wages but does not remove all distributional concerns. Third, the estimate is an average association and may hide heterogeneous returns across gender, hukou status, region, and education level.
+
+\section{Conclusion}
+
+Using CFPS 2022 data, this paper finds a robust positive relationship between education and adult income in China. In the preferred model, one more year of education is associated with approximately 8.8 percent higher wage income after controlling for demographic factors and province fixed effects. The evidence supports the view that education is closely linked to labor-market advantage, but the cross-sectional design means the estimate should not be read as a definitive causal return to schooling.
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}

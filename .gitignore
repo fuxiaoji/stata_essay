@@ -1,0 +1,12 @@
+.DS_Store
+__pycache__/
+*.pyc
+*.zip
+Data_done/05_latex/*.aux
+Data_done/05_latex/*.bbl
+Data_done/05_latex/*.blg
+Data_done/05_latex/*.fls
+Data_done/05_latex/*.fdb_latexmk
+Data_done/05_latex/*.log
+Data_done/05_latex/*.out
+Data_done/05_latex/*.synctex.gz

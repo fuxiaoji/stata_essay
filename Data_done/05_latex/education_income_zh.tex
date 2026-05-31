@@ -1,0 +1,135 @@
+\documentclass[UTF8,12pt]{ctexart}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{natbib}
+\usepackage{amsmath}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  citecolor=blue,
+  urlcolor=blue
+}
+
+\onehalfspacing
+
+\title{教育是否提高中国成年人的收入？\\基于 CFPS 2022 的经验证据}
+\author{实证论文}
+\date{2026 年 5 月 31 日}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+本文使用 CFPS 2022 数据考察教育水平与中国成年人收入之间的关系。样本限定为 18--64 岁、工资收入和核心控制变量非缺失的受访者，最终得到 4,699 个观测值。本文以 $\ln(\mathrm{wage}+1)$ 为主要因变量，以受教育年限为核心解释变量，使用稳健标准误的普通最小二乘法，并逐步加入人口学控制变量和省份固定效应。首选模型中，受教育年限系数为 0.0882，且在 1\% 水平显著，说明在控制可观测因素后，教育年限每增加一年，工资收入平均约高 8.8\%。替换教育变量、替换收入变量以及仅保留正工资样本的稳健性检验均支持教育与收入之间的正相关关系。由于本文使用横截面观察数据，估计结果应解释为条件相关关系，而不能直接解释为严格因果效应。
+\end{abstract}
+
+\noindent\textbf{关键词：} 教育；收入；CFPS；中国；明瑟方程；教育回报
+
+\section{引言}
+
+教育是理解劳动市场收入差异的重要变量。人力资本理论认为，教育可以通过提高技能、生产率和职业匹配质量来提升个体收入 \citep{becker1964human, mincer1974schooling}。但教育收入关系的识别并不简单，因为教育选择往往与家庭背景、能力、地区机会和劳动市场条件共同相关。已有研究因此强调，普通最小二乘估计更适合被谨慎解释为相关关系，而严格因果解释需要更强的识别设计 \citep{card1999causal, angrist1991compulsory}。
+
+本文关注一个直接问题：在 CFPS 2022 的中国成年样本中，教育水平是否与更高收入显著相关？基于 4,699 个观测值的分析显示，教育与收入之间存在稳定、显著且经济意义较强的正相关。本文的贡献在于使用较新的 CFPS 2022 微观数据，提供一份可复现的 Stata、Python 和 \LaTeX{} 分析流程，并在解释上明确区分相关关系与因果效应。
+
+\section{文献回顾}
+
+本文的实证设定源于明瑟收入方程，即用教育和劳动市场经验解释对数收入 \citep{mincer1974schooling}。在人力资本框架中，教育被视为一种能够提高未来收益的投资 \citep{becker1964human}。后续文献指出，如果个体能力、家庭背景或地区机会同时影响教育和收入，OLS 估计可能存在遗漏变量偏误，因此因果识别需要工具变量、自然实验或其他准实验方法 \citep{card1999causal, heckman2008earnings}。
+
+关于中国的经验证据，\citet{zhang2005urban} 发现 1988--2001 年城市中国的教育经济回报上升。CFPS 则为研究当代中国家庭与个人结果提供了重要数据基础，其抽样设计见 \citet{xie2015sampling}。本文基于 CFPS 2022 数据，对教育收入关系进行更新分析。
+
+\section{数据与变量}
+
+本文使用北京大学中国社会科学调查中心的 CFPS 2022 数据 \citep{cfps2022data}。样本处理步骤包括：保留 2022 年受访者；年龄限制在 18--64 岁；要求工资收入非缺失；并要求主要因变量、教育变量、年龄、年龄平方、性别、婚姻、城乡户口、医保和省份代码等核心变量非缺失。最终分析样本为 4,699 人。
+
+主要因变量为 $\ln(\mathrm{wage}+1)$，其中 wage 表示个人年度工资收入。核心解释变量为受教育年限。控制变量包括年龄、年龄平方、性别、婚姻状态、农业户口、医保和省份固定效应。表 \ref{tab:desc} 展示描述性统计，表 \ref{tab:edu} 展示教育分类分布。
+
+\begin{table}[H]
+\centering
+\caption{描述性统计}
+\label{tab:desc}
+\input{tables/table_descriptive_statistics.tex}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{教育水平分布}
+\label{tab:edu}
+\input{tables/table_education_distribution.tex}
+\end{table}
+
+\section{模型设定}
+
+基准模型如下：
+\begin{equation}
+\ln(\mathrm{wage}_i+1)=\alpha+\beta\,\mathrm{educ}_i+\gamma X_i+\mu_p+\varepsilon_i,
+\end{equation}
+其中 $\mathrm{educ}_i$ 为受教育年限，$X_i$ 为个体控制变量，$\mu_p$ 为省份固定效应。本文所有回归均使用稳健标准误。基准回归依次估计三个模型：仅包含教育年限的模型、加入人口学控制变量的模型、进一步加入省份固定效应的首选模型。稳健性检验包括使用家庭人均纯收入对数作为替代因变量，以及仅保留工资收入为正的样本。
+
+\section{实证结果}
+
+图 \ref{fig:distribution} 显示，样本主要集中在初中、高中、大专和本科教育层级。图 \ref{fig:wageedu} 进一步显示，平均对数工资随教育层级提高而上升。图 \ref{fig:fit} 使用受教育年限分组均值展示了类似的正向梯度。
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/viz_education_distribution.png}
+\caption{分析样本的教育构成}
+\label{fig:distribution}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/viz_wage_by_education.png}
+\caption{不同教育水平的平均对数工资}
+\label{fig:wageedu}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/viz_binned_education_wage_fit.png}
+\caption{教育年限与工资收入的分组拟合关系}
+\label{fig:fit}
+\end{figure}
+
+表 \ref{tab:reg} 报告教育系数在不同模型中的估计结果。首选模型中，受教育年限系数为 0.0882，稳健标准误为 0.0062，在 1\% 水平显著。近似解释为：在控制人口学特征和省份固定效应后，教育年限每增加一年，工资收入平均约高 8.8\%。
+
+\begin{table}[H]
+\centering
+\caption{不同模型中的教育系数}
+\label{tab:reg}
+\input{tables/table_regression_education_returns.tex}
+\begin{flushleft}
+\footnotesize 注：括号内为稳健标准误。M1 仅包含教育年限；M2 加入人口学控制变量；M3 进一步加入省份固定效应。Alt. income 使用 $\ln(\mathrm{inc1}+1)$ 为因变量。Positive wage 仅保留工资收入大于 0 的样本。$^{*}p<0.10$，$^{**}p<0.05$，$^{***}p<0.01$。
+\end{flushleft}
+\end{table}
+
+图 \ref{fig:coef} 汇总了不同设定下教育系数及其 95\% 稳健置信区间。可以看到，在加入控制变量和省份固定效应后，教育系数有所下降但仍显著为正。替代收入变量的教育系数为 0.0728，正工资样本的教育系数为 0.0788，均支持基准结论。
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/viz_regression_coefficients.png}
+\caption{不同模型中的教育收入相关系数}
+\label{fig:coef}
+\end{figure}
+
+\section{讨论与局限}
+
+本文结果与人力资本理论和既有中国研究相一致，说明教育与劳动市场收入之间存在紧密联系。从经济意义看，数年教育差异可能对应相当可观的预测收入差异。省份固定效应的加入也说明，该关系并非完全由大区域工资水平差异驱动。
+
+但本文仍有三点局限。第一，横截面数据无法充分控制不可观测能力、家庭背景、学校质量、行业、职业和迁移经历，因此结果不能被直接解释为因果效应。第二，工资收入分布高度偏态，虽然对数变换缓解了极端值影响，但并不能完全消除分布问题。第三，本文估计的是平均相关关系，教育回报可能在性别、户口、地区和教育层级之间存在异质性。
+
+\section{结论}
+
+基于 CFPS 2022 数据，本文发现教育水平与中国成年人收入之间存在稳定正相关。在控制人口学变量和省份固定效应后，受教育年限每增加一年，工资收入平均约高 8.8\%。这一结果说明教育仍然是理解中国劳动市场收入差异的重要因素。但由于识别策略基于横截面 OLS，本文结论应定位为教育与收入之间的条件相关关系，而非严格因果回报估计。
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}
