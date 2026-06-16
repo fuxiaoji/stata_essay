@@ -81,24 +81,30 @@ Figure~\ref{fig:distribution} shows that junior-high, high-school, college, and 
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.92\textwidth]{figures/viz_education_distribution.png}
+\includegraphics[width=0.86\textwidth]{figures/viz_education_distribution.png}
 \caption{Education composition of the analytic sample}
 \label{fig:distribution}
 \end{figure}
 
+Figure~\ref{fig:distribution} shows that respondents are mainly distributed across junior high school, senior high school, college, and bachelor's degree categories. Notably, respondents with college education or above account for roughly one-third of the analytic sample, reflecting the broader accessibility of higher education in recent years.
+
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.92\textwidth]{figures/viz_wage_by_education.png}
+\includegraphics[width=0.86\textwidth]{figures/viz_wage_by_education.png}
 \caption{Mean log wage income by education category}
 \label{fig:wageedu}
 \end{figure}
 
+Figure~\ref{fig:wageedu} further illustrates that average log wage income rises with educational attainment. The increase is especially visible from junior high school to senior high school and from senior high school to college, while a positive wage premium is also observed from college to bachelor's degree. This pattern provides descriptive evidence for a positive education-income association.
+
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.92\textwidth]{figures/viz_binned_education_wage_fit.png}
+\includegraphics[width=0.86\textwidth]{figures/viz_binned_education_wage_fit.png}
 \caption{Binned education-wage gradient}
 \label{fig:fit}
 \end{figure}
+
+Figure~\ref{fig:fit} presents a similar positive gradient based on grouped mean values by years of schooling. This graphical evidence is consistent with Figure~\ref{fig:wageedu} and reinforces the same relationship using education as a continuous variable.
 
 Table~\ref{tab:reg} presents the main regression estimates. The preferred specification with demographic controls and province fixed effects estimates an education coefficient of 0.0882 with a robust standard error of 0.0062. The coefficient is significant at the 1 percent level. Interpreted approximately, one additional year of education is associated with about 8.8 percent higher wage income, conditional on the included controls.
 
@@ -112,20 +118,67 @@ Table~\ref{tab:reg} presents the main regression estimates. The preferred specif
 \end{flushleft}
 \end{table}
 
+\subsection{Hypothesis Testing}
+
+To formally test the relationship between education and income, this paper conducts a standard hypothesis test on the coefficient of years of schooling in the preferred model. The null hypothesis is $H_0:\beta_{\mathrm{educ}}=0$, meaning that years of schooling have no statistically significant association with income after controlling for the other variables. The alternative hypothesis is $H_1:\beta_{\mathrm{educ}}\neq 0$.
+
+Based on Model 3, the estimated coefficient is $\hat{\beta}_{\mathrm{educ}}=0.0882$ and the robust standard error is 0.0062. The implied test statistic is approximately
+\[
+t=\frac{0.0882}{0.0062}\approx 14.23,
+\]
+with $p<0.001$. At the 1 percent significance level, the null hypothesis is rejected. The sample therefore provides strong statistical evidence that years of schooling are positively associated with income after controlling for age, gender, marital status, hukou status, medical insurance, and province fixed effects. As a comparison, applying the same logic to marital status in Model 3 yields a p-value of about 0.749, so the relationship between marital status and income is not statistically significant in this sample.
+
 Figure~\ref{fig:coef} summarizes the education coefficients and their 95 percent robust confidence intervals. The positive association remains stable after adding controls and remains positive in both robustness checks. The alternative household-income outcome produces a smaller coefficient of 0.0728, while the positive-wage subsample gives 0.0788.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.92\textwidth]{figures/viz_regression_coefficients.png}
+\includegraphics[width=0.86\textwidth]{figures/viz_regression_coefficients.png}
 \caption{Education-income association across specifications}
 \label{fig:coef}
 \end{figure}
 
 \section{Discussion and Limitations}
 
-The results are consistent with human-capital theory and with prior evidence that education is strongly associated with earnings in China. The magnitude is economically meaningful: a several-year difference in schooling corresponds to a sizable predicted difference in wage income. The inclusion of province fixed effects reduces concerns that the estimate is driven solely by broad regional wage differences.
+Based on CFPS 2022 data, this paper finds a significant and robust positive correlation between years of schooling and income among Chinese adults. After controlling for demographic variables and province fixed effects, each additional year of education is associated with an average wage increase of approximately 8.8 percent. This finding is consistent with human-capital theory and with recent empirical studies based on Chinese data. Several points deserve further discussion.
 
-Nevertheless, the analysis has important limitations. First, the data are cross-sectional, so unobserved ability, parental background, school quality, industry, occupation, and migration history may still confound the estimate. Second, annual wage income is skewed, and the log transformation with $+1$ handles zero wages but does not remove all distributional concerns. Third, the estimate is an average association and may hide heterogeneous returns across gender, hukou status, region, and education level.
+\subsection{Correlation Versus Causation}
+
+The cross-sectional OLS method used in this paper cannot fully overcome omitted-variable bias from unobserved factors such as ability, motivation, family background, school quality, and occupational choice. Therefore, the 8.8 percent estimate should be understood as a conditional association rather than a strict rate of return to education. Although the robustness checks support the stability of the result's direction, future research aiming for causal inference could consider quasi-experimental designs such as instrumental variables based on compulsory-education reforms, regression-discontinuity designs, or difference-in-differences methods.
+
+\subsection{Potential Heterogeneity}
+
+This paper estimates an average association, but education returns may vary across groups. Important extensions include the following:
+
+\begin{itemize}
+  \item \textbf{Gender:} Are returns to education higher for women than for men?
+  \item \textbf{Hukou status:} Is there a gap between agricultural and non-agricultural hukou holders?
+  \item \textbf{Region:} Do returns to education differ across eastern, central, and western China?
+  \item \textbf{Education level:} Are marginal returns nonlinear between basic education and higher education?
+\end{itemize}
+
+Due to space constraints and the focus of this analysis, this paper does not conduct a systematic heterogeneity analysis, but this should be an important direction for future research.
+
+\subsection{Labor-Market Structure and Institutions}
+
+The income effect of education is not determined only by the supply side of human capital; it also depends on labor-market demand. If high-quality jobs are scarce, or if hukou segmentation, industry monopolies, or employment discrimination remain severe, the realized returns to education may be suppressed. Education policy should therefore be coordinated with industrial policy, employment policy, and hukou reform to more fully realize the income-enhancing potential of human capital.
+
+\subsection{Measurement and Representativeness}
+
+The wage income used in this paper is self-reported and may contain measurement error. In addition, the analytic sample is limited to adults with wage income and non-missing control variables, potentially excluding people without wage income, such as self-employed workers, farmers, and unemployed individuals. This limitation may affect the external validity of the conclusions. Future research could extend the analysis to broader income measures, such as total personal income or household per-capita income, and to more diverse employment types.
+
+\subsection{Contribution and Reproducibility}
+
+Despite these limitations, the value of this paper lies in its use of relatively recent CFPS 2022 microdata and a clearly structured, reproducible workflow that includes Stata, Python, and LaTeX files. By distinguishing correlation from causation, the paper provides a benchmark framework that can be directly extended or modified in subsequent research.
+
+\section{Policy Implications}
+
+The findings indicate that education remains a key factor affecting income levels in China's labor market. Based on the estimated education-income association of approximately 8.8 percent, three policy implications follow.
+
+First, continued investment in education has clear economic rationale. For individuals, education remains an effective path to income growth. For public policy, sustaining universal basic education and steadily expanding access to senior high school and higher education can improve the overall quality of the labor force and create conditions for narrowing income gaps.
+
+Second, education policy should be coordinated with labor-market policy. Education can raise income only when the labor market efficiently allocates and rewards skilled workers. If industrial upgrading lags behind, high-quality jobs are insufficient, or institutional segmentation persists, the human-capital value of education may not be fully realized. Educational investment should therefore be aligned with employment promotion, industrial upgrading, and coordinated regional development.
+
+Third, policymakers should pay attention to group differences in returns to education. This paper estimates an average relationship, but prior literature suggests that returns may vary by gender, hukou status, region, and education level. Future policy design should use more localized evidence, avoid one-size-fits-all interventions, and direct educational resources toward groups and sectors with greater return potential.
 
 \section{Conclusion}
 
