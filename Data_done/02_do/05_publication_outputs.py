@@ -31,6 +31,41 @@ EDU_LABELS = {
     7: "Doctorate",
 }
 
+EDU_LABELS_ZH = {
+    0: "文盲",
+    1: "小学",
+    2: "初中",
+    3: "高中",
+    4: "大专",
+    5: "本科",
+    6: "硕士",
+    7: "博士",
+}
+
+DESC_LABELS_ZH = {
+    "Annual wage income": "年度工资收入",
+    "ln(wage + 1)": "ln(工资 + 1)",
+    "Years of education": "受教育年限",
+    "Age": "年龄",
+    "Male": "男性",
+    "Rural hukou": "农业户口",
+}
+
+MODEL_LABELS_ZH = {
+    "M1": "模型 1",
+    "M2": "模型 2",
+    "M3": "模型 3",
+    "Alt. income": "替代收入",
+    "Positive wage": "正工资样本",
+}
+
+GROUP_LABELS_ZH = {
+    "Women": "女性",
+    "Men": "男性",
+    "Non-rural hukou": "非农业户口",
+    "Rural hukou": "农业户口",
+}
+
 
 def ensure_dirs() -> None:
     FIG.mkdir(parents=True, exist_ok=True)
@@ -137,6 +172,12 @@ def regression_outputs(df: pd.DataFrame) -> dict[str, object]:
         reg_rows,
         align="lrrrr",
     )
+    write_tex_table(
+        TAB / "table_regression_education_returns_zh.tex",
+        ["模型", "教育系数", "稳健标准误", "样本量", "$R^2$"],
+        [[MODEL_LABELS_ZH[row[0]], *row[1:]] for row in reg_rows],
+        align="lrrrr",
+    )
 
     pd.DataFrame(coef_rows).to_csv(TAB / "model_coefficients.csv", index=False)
     return {"models": results, "coef_rows": coef_rows}
@@ -171,6 +212,12 @@ def summary_outputs(df: pd.DataFrame) -> dict[str, object]:
         rows,
         align="lrrrrrr",
     )
+    write_tex_table(
+        TAB / "table_descriptive_statistics_zh.tex",
+        ["变量", "样本量", "均值", "标准差", "最小值", "中位数", "最大值"],
+        [[DESC_LABELS_ZH[row[0]], *row[1:]] for row in rows],
+        align="lrrrrrr",
+    )
 
     edu_counts = (
         df["edu"]
@@ -185,6 +232,15 @@ def summary_outputs(df: pd.DataFrame) -> dict[str, object]:
         TAB / "table_education_distribution.tex",
         ["Education category", "N", "Percent"],
         edu_rows,
+        align="lrr",
+    )
+    edu_rows_zh = [
+        [EDU_LABELS_ZH[int(row.edu)], f"{int(row.n):,}", f"{row.share:.2f}"] for row in edu_counts.itertuples()
+    ]
+    write_tex_table(
+        TAB / "table_education_distribution_zh.tex",
+        ["教育类别", "样本量", "占比（\\%）"],
+        edu_rows_zh,
         align="lrr",
     )
     edu_counts.to_csv(TAB / "education_distribution.csv", index=False)
@@ -310,16 +366,90 @@ def figure_coefficients(coef_rows: list[dict[str, float | str]]) -> None:
     plt.close(fig)
 
 
+def heterogeneity_outputs(df: pd.DataFrame) -> list[dict[str, float | str]]:
+    groups = [
+        ("Women", df[df["gen"] == 0]),
+        ("Men", df[df["gen"] == 1]),
+        ("Non-rural hukou", df[df["rural"] == 0]),
+        ("Rural hukou", df[df["rural"] == 1]),
+    ]
+    rows: list[list[object]] = []
+    coef_rows: list[dict[str, float | str]] = []
+    formula = "lnwage ~ educ + age_ + age2 + mar + medsure_dum + C(provcd)"
+    for label, subdf in groups:
+        res = fit_model(subdf, formula)
+        beta = float(res.params["educ"])
+        se = float(res.bse["educ"])
+        pvalue = float(res.pvalues["educ"])
+        rows.append([label, f"{beta:.4f}{pstars(pvalue)}", f"({se:.4f})", f"{int(res.nobs):,}", f"{res.rsquared:.3f}"])
+        coef_rows.append(
+            {
+                "group": label,
+                "coef": beta,
+                "se": se,
+                "lower": beta - 1.96 * se,
+                "upper": beta + 1.96 * se,
+                "pvalue": pvalue,
+                "nobs": float(res.nobs),
+                "rsq": float(res.rsquared),
+            }
+        )
+
+    write_tex_table(
+        TAB / "table_heterogeneity_returns.tex",
+        ["Subsample", "Education coefficient", "Robust SE", "N", "$R^2$"],
+        rows,
+        align="lrrrr",
+    )
+    write_tex_table(
+        TAB / "table_heterogeneity_returns_zh.tex",
+        ["子样本", "教育系数", "稳健标准误", "样本量", "$R^2$"],
+        [[GROUP_LABELS_ZH[row[0]], *row[1:]] for row in rows],
+        align="lrrrr",
+    )
+    pd.DataFrame(coef_rows).to_csv(TAB / "heterogeneity_coefficients.csv", index=False)
+    return coef_rows
+
+
+def figure_heterogeneity(coef_rows: list[dict[str, float | str]]) -> None:
+    data = pd.DataFrame(coef_rows)
+    fig, ax = plt.subplots(figsize=(8.4, 4.6))
+    y = np.arange(len(data))[::-1]
+    colors = ["#7A4EAB", "#1E6091", "#E07A5F", "#2A9D8F"]
+    ax.errorbar(
+        data["coef"],
+        y,
+        xerr=[data["coef"] - data["lower"], data["upper"] - data["coef"]],
+        fmt="o",
+        color="#111827",
+        ecolor="#5B677A",
+        elinewidth=1.8,
+        capsize=4,
+    )
+    ax.scatter(data["coef"], y, s=105, c=colors[: len(data)], edgecolor="white", linewidth=0.9, zorder=3)
+    ax.axvline(0, color="#6B7280", linewidth=1.0, linestyle="--")
+    ax.set_yticks(y)
+    ax.set_yticklabels(data["group"])
+    ax.set_xlabel("Education coefficient by subsample, with 95% robust confidence interval")
+    ax.set_title("Heterogeneous Education-Income Associations")
+    ax.grid(axis="x", alpha=0.18)
+    fig.tight_layout()
+    fig.savefig(FIG / "viz_heterogeneity_coefficients.png", bbox_inches="tight")
+    plt.close(fig)
+
+
 def main() -> None:
     ensure_dirs()
     configure_plot()
     df = pd.read_csv(DATA)
     summary = summary_outputs(df)
     regressions = regression_outputs(df)
+    heterogeneity = heterogeneity_outputs(df)
     figure_education_distribution(summary["education_counts"])
     figure_wage_by_education(df)
     figure_binned_fit(df)
     figure_coefficients(regressions["coef_rows"])
+    figure_heterogeneity(heterogeneity)
 
     overview = {
         "n": int(len(df)),
@@ -328,6 +458,7 @@ def main() -> None:
         "main_r2": float(regressions["models"]["M3"].rsquared),
         "positive_wage_coef": float(regressions["models"]["Positive wage"].params["educ"]),
         "alt_income_coef": float(regressions["models"]["Alt. income"].params["educ"]),
+        "heterogeneity": heterogeneity,
     }
     (OUT / "analysis_summary.json").write_text(json.dumps(overview, indent=2), encoding="utf-8")
     print(json.dumps(overview, indent=2))

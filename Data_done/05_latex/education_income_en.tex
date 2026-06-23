@@ -45,7 +45,9 @@ This paper asks a focused empirical question: in the CFPS 2022 adult sample, is 
 
 The empirical specification follows the Mincerian earnings-function framework, in which log earnings are modeled as a function of schooling and labor-market experience \citep{mincer1974schooling}. Human-capital theory provides the economic mechanism behind this relationship: schooling may raise earnings by increasing skills and productivity \citep{becker1964human}. Later work emphasizes that OLS estimates may be biased if unobserved ability or family background affects both education and earnings; quasi-experimental approaches are therefore important for causal interpretation \citep{card1999causal, angrist1991compulsory, heckman2008earnings}.
 
-Evidence from China also finds substantial education-income gradients, especially during market-oriented reforms. \citet{zhang2005urban} document rising economic returns to schooling in urban China from 1988 to 2001. This paper contributes a compact update using CFPS 2022 microdata, a nationally oriented survey whose sampling design is documented by \citet{xie2015sampling}.
+Evidence from China also finds substantial education-income gradients, especially during market-oriented reforms. \citet{zhang2005urban} document rising economic returns to schooling in urban China from 1988 to 2001. More recent evidence suggests that the education premium has continued to evolve with structural change in the labor market: \citet{asadullah2020changing} show that wage returns to education changed during 2010--2015, while the large meta-analysis by \citet{ma2021meta} confirms a positive return to schooling in China and documents heterogeneity across gender, hukou status, sector, region, and time period.
+
+Two recent strands are particularly relevant for interpreting the present results. First, quasi-experimental work using the great higher-education expansion provides stronger causal evidence than standard cross-sectional OLS. \citet{huang2022expansion}, for example, use the expansion as a source of variation and find sizable earnings returns to education, while also emphasizing hukou-related differences in access and gains. Second, studies of mechanisms and labor-market segmentation show that the education-income link may not be purely a human-capital channel. \citet{li2023highereducation} argue that the value of higher education in China may reflect human capital, signaling, and social networks, while \citet{li2025gender} show that education returns and the gender wage gap differ by sector. Research on vocational education further indicates that returns can vary by educational track and over time \citep{chen2024vocational}. This paper contributes a compact update using CFPS 2022 microdata, a nationally oriented survey whose sampling design is documented by \citet{xie2015sampling}.
 
 \section{Data and Variables}
 
@@ -137,13 +139,36 @@ Figure~\ref{fig:coef} summarizes the education coefficients and their 95 percent
 \label{fig:coef}
 \end{figure}
 
+\subsection{Heterogeneity by Gender and Hukou}
+
+Recent studies emphasize that education returns in China are not uniform across groups \citep{ma2021meta, li2025gender}. To provide a compact descriptive check, this paper re-estimates the preferred specification separately by gender and hukou status. These subsample regressions keep the same age, marital-status, medical-insurance, and province controls, but omit the grouping variable used to split the sample.
+
+\begin{table}[H]
+\centering
+\caption{Heterogeneous Education Coefficients}
+\label{tab:heterogeneity}
+\input{tables/table_heterogeneity_returns.tex}
+\begin{flushleft}
+\footnotesize Notes: Each row reports a separate robust OLS regression using the preferred control set. Gender-specific models omit the gender indicator because the sample is split by gender. Hukou-specific models omit the rural-hukou indicator. $^{*}p<0.10$, $^{**}p<0.05$, $^{***}p<0.01$.
+\end{flushleft}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.86\textwidth]{figures/viz_heterogeneity_coefficients.png}
+\caption{Education-income association by gender and hukou subsample}
+\label{fig:heterogeneity}
+\end{figure}
+
+Table~\ref{tab:heterogeneity} and Figure~\ref{fig:heterogeneity} show clear heterogeneity. The education coefficient is larger for women than for men, which is consistent with evidence that women often obtain relatively high returns to schooling even while facing broader labor-market inequality \citep{ma2021meta, li2025gender}. The coefficient is also larger among non-rural hukou holders than among rural hukou holders. This pattern echoes the argument that institutional segmentation, including hukou-based constraints, can shape both access to education and the conversion of education into earnings \citep{huang2022expansion}. These subgroup results should still be read descriptively, because they are based on smaller cross-sectional subsamples rather than a causal design.
+
 \section{Discussion and Limitations}
 
-Based on CFPS 2022 data, this paper finds a significant and robust positive correlation between years of schooling and income among Chinese adults. After controlling for demographic variables and province fixed effects, each additional year of education is associated with an average wage increase of approximately 8.8 percent. This finding is consistent with human-capital theory and with recent empirical studies based on Chinese data. Several points deserve further discussion.
+Based on CFPS 2022 data, this paper finds a significant and robust positive correlation between years of schooling and income among Chinese adults. After controlling for demographic variables and province fixed effects, each additional year of education is associated with an average wage increase of approximately 8.8 percent. This finding is consistent with human-capital theory and with recent empirical studies based on Chinese data \citep{asadullah2020changing, ma2021meta, huang2022expansion}. Several points deserve further discussion.
 
 \subsection{Correlation Versus Causation}
 
-The cross-sectional OLS method used in this paper cannot fully overcome omitted-variable bias from unobserved factors such as ability, motivation, family background, school quality, and occupational choice. Therefore, the 8.8 percent estimate should be understood as a conditional association rather than a strict rate of return to education. Although the robustness checks support the stability of the result's direction, future research aiming for causal inference could consider quasi-experimental designs such as instrumental variables based on compulsory-education reforms, regression-discontinuity designs, or difference-in-differences methods.
+The cross-sectional OLS method used in this paper cannot fully overcome omitted-variable bias from unobserved factors such as ability, motivation, family background, school quality, and occupational choice. Therefore, the 8.8 percent estimate should be understood as a conditional association rather than a strict rate of return to education. Although the robustness checks support the stability of the result's direction, future research aiming for causal inference could consider quasi-experimental designs such as instrumental variables based on compulsory-education reforms, regression-discontinuity designs, or difference-in-differences methods. This is why studies such as \citet{huang2022expansion}, which exploit the higher-education expansion for identification, are useful benchmarks for interpreting the limitations of standard OLS estimates.
 
 \subsection{Potential Heterogeneity}
 
@@ -156,11 +181,11 @@ This paper estimates an average association, but education returns may vary acro
   \item \textbf{Education level:} Are marginal returns nonlinear between basic education and higher education?
 \end{itemize}
 
-Due to space constraints and the focus of this analysis, this paper does not conduct a systematic heterogeneity analysis, but this should be an important direction for future research.
+The subgroup estimates reported above suggest that these questions are not merely conceptual. Gender and hukou differences appear in the CFPS 2022 sample, and they are consistent with broader evidence on segmented education returns in China \citep{ma2021meta, li2025gender}. A fuller analysis would formally test interactions and explore whether education premiums differ by province, employment sector, occupation, and education track.
 
 \subsection{Labor-Market Structure and Institutions}
 
-The income effect of education is not determined only by the supply side of human capital; it also depends on labor-market demand. If high-quality jobs are scarce, or if hukou segmentation, industry monopolies, or employment discrimination remain severe, the realized returns to education may be suppressed. Education policy should therefore be coordinated with industrial policy, employment policy, and hukou reform to more fully realize the income-enhancing potential of human capital.
+The income effect of education is not determined only by the supply side of human capital; it also depends on labor-market demand. If high-quality jobs are scarce, or if hukou segmentation, industry monopolies, or employment discrimination remain severe, the realized returns to education may be suppressed. Recent research on higher education also suggests that returns may reflect signaling and social networks as well as skills \citep{li2023highereducation}. Education policy should therefore be coordinated with industrial policy, employment policy, and hukou reform to more fully realize the income-enhancing potential of human capital.
 
 \subsection{Measurement and Representativeness}
 
@@ -176,7 +201,7 @@ The findings indicate that education remains a key factor affecting income level
 
 First, continued investment in education has clear economic rationale. For individuals, education remains an effective path to income growth. For public policy, sustaining universal basic education and steadily expanding access to senior high school and higher education can improve the overall quality of the labor force and create conditions for narrowing income gaps.
 
-Second, education policy should be coordinated with labor-market policy. Education can raise income only when the labor market efficiently allocates and rewards skilled workers. If industrial upgrading lags behind, high-quality jobs are insufficient, or institutional segmentation persists, the human-capital value of education may not be fully realized. Educational investment should therefore be aligned with employment promotion, industrial upgrading, and coordinated regional development.
+Second, education policy should be coordinated with labor-market policy. Education can raise income only when the labor market efficiently allocates and rewards skilled workers. If industrial upgrading lags behind, high-quality jobs are insufficient, or institutional segmentation persists, the human-capital value of education may not be fully realized. The evidence on vocational education is especially relevant here: \citet{chen2024vocational} show that returns differ across educational tracks, which implies that expanding education quantity alone is not enough unless training quality and labor-market demand are aligned. Educational investment should therefore be connected with employment promotion, industrial upgrading, vocational training quality, and coordinated regional development.
 
 Third, policymakers should pay attention to group differences in returns to education. This paper estimates an average relationship, but prior literature suggests that returns may vary by gender, hukou status, region, and education level. Future policy design should use more localized evidence, avoid one-size-fits-all interventions, and direct educational resources toward groups and sectors with greater return potential.
 
