@@ -5,7 +5,6 @@
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{caption}
-\usepackage{subcaption}
 \usepackage{float}
 \usepackage{hyperref}
 \usepackage{xurl}
@@ -19,41 +18,56 @@
   urlcolor=blue
 }
 \Urlmuskip=0mu plus 2mu\relax
-
 \onehalfspacing
 
-\title{教育是否提高中国成年人的收入？\\基于 CFPS 2022 的经验证据}
+\title{教育是否提高中国成年人的收入？\\基于 CFPS 2022 的数据审计、双重稳健估计与弱工具变量诊断}
 \author{实证论文}
-\date{2026 年 5 月 31 日}
+\date{2026 年 6 月 25 日}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-本文使用 CFPS 2022 数据考察教育水平与中国成年人收入之间的关系。样本限定为 18--64 岁、工资收入和核心控制变量非缺失的受访者，最终得到 4,699 个观测值。本文以 $\ln(\mathrm{wage}+1)$ 为主要因变量，以受教育年限为核心解释变量，使用稳健标准误的普通最小二乘法，并逐步加入人口学控制变量和省份固定效应。首选模型中，受教育年限系数为 0.0882，且在 1\% 水平显著，说明在控制可观测因素后，教育年限每增加一年，工资收入平均约高 8.8\%。替换教育变量、替换收入变量以及仅保留正工资样本的稳健性检验均支持教育与收入之间的正相关关系。由于本文使用横截面观察数据，估计结果应解释为条件相关关系，而不能直接解释为严格因果效应。
+本文使用 CFPS 2022 微观数据重新考察教育是否提高中国成年人的收入。相较于传统明瑟方程，本文做了三方面改进。第一，加入完整的数据质量检查，报告样本筛选、缺失情况、异常值处理和共同支撑。第二，将核心问题从“受教育年限与收入是否相关”推进到“大专及以上教育是否提高工资收入”，并使用交叉拟合的增强逆概率加权（AIPW）估计平均处理效应。第三，检验而不是直接假定 1999 年高等教育扩招可以作为工具变量识别策略。最终分析样本为 4,699 名劳动年龄成年人。OLS 结果显示，受教育年限每增加一年，工资收入约高 8.8\%；大专及以上教育对应约 0.74 个对数点的工资优势。首选 AIPW 估计为 0.710 个对数点，稳健性估计范围为 0.669--0.773。平衡性诊断显示，权重显著降低了年龄、性别、户口、城乡、婚姻和医保等协变量差异。然而，扩招工具变量在较窄出生队列窗口中的第一阶段很弱，因此本文只将其作为诊断结果，而不将其包装为主要因果证据。总体而言，本文支持教育与收入之间存在显著正向关系，并提供了比简单 OLS 更扎实的选择性可观测条件下的处理效应估计。
 \end{abstract}
 
-\noindent\textbf{关键词：} 教育；收入；CFPS；中国；明瑟方程；教育回报
+\noindent\textbf{关键词：} 教育；收入；CFPS；双重稳健估计；因果推断；高等教育扩招
 
 \section{引言}
 
-教育是理解劳动市场收入差异的重要变量。人力资本理论认为，教育可以通过提高技能、生产率和职业匹配质量来提升个体收入 \citep{becker1964human, mincer1974schooling}。但教育收入关系的识别并不简单，因为教育选择往往与家庭背景、能力、地区机会和劳动市场条件共同相关。已有研究因此强调，普通最小二乘估计更适合被谨慎解释为相关关系，而严格因果解释需要更强的识别设计 \citep{card1999causal, angrist1991compulsory}。
+教育是解释劳动市场收入差异的重要因素。人力资本理论认为，教育能够通过提升技能、生产率和职业匹配质量来增加收入 \citep{becker1964human, mincer1974schooling}。但是，教育并非随机分配，家庭背景、能力、地区机会和制度条件可能同时影响教育和收入，因此简单 OLS 往往只能解释为条件相关关系 \citep{card1999causal, heckman2008earnings}。
 
-本文关注一个直接问题：在 CFPS 2022 的中国成年样本中，教育水平是否与更高收入显著相关？基于 4,699 个观测值的分析显示，教育与收入之间存在稳定、显著且经济意义较强的正相关。本文的贡献在于使用较新的 CFPS 2022 微观数据，提供一份可复现的 Stata、Python 和 \LaTeX{} 分析流程，并在解释上明确区分相关关系与因果效应。
+本文此前版本主要回答“教育与收入是否显著正相关”。这个问题有意义，但创新性和因果推断不足。新版论文将研究设计改为三层结构：第一，先做数据审计，说明样本如何从原始数据进入最终回归；第二，以“大专及以上教育”为处理变量，使用双重稳健 AIPW 方法估计平均处理效应 \citep{hirano2003efficient, bang2005doubly}；第三，尝试利用 1999 年高等教育扩招作为政策暴露，但根据第一阶段强度判断其是否可作为主识别策略。
 
-\section{文献回顾}
+因此，本文的创新并不是声称已经获得完美因果识别，而是在可用数据条件下更诚实、更扎实地推进识别：OLS 作为基准，AIPW 作为主要因果推断框架，扩招工具变量作为经过检验的辅助诊断。
 
-本文的实证设定源于明瑟收入方程，即用教育和劳动市场经验解释对数收入 \citep{mincer1974schooling}。在人力资本框架中，教育被视为一种能够提高未来收益的投资 \citep{becker1964human}。后续文献指出，如果个体能力、家庭背景或地区机会同时影响教育和收入，OLS 估计可能存在遗漏变量偏误，因此因果识别需要工具变量、自然实验或其他准实验方法 \citep{card1999causal, heckman2008earnings}。
+\section{文献与识别思路}
 
-关于中国的经验证据，\citet{zhang2005urban} 发现 1988--2001 年城市中国的教育经济回报上升。近年来的研究进一步说明，教育回报会随着劳动力市场结构变化而变化：\citet{asadullah2020changing} 发现 2010--2015 年中国教育工资回报的模式发生变化；\citet{ma2021meta} 的大型元分析则确认中国教育回报总体为正，同时存在性别、户口、部门、地区和时期差异。
+本文的起点是明瑟收入方程 \citep{mincer1974schooling}。大量研究发现教育与收入正相关，但也强调 OLS 可能受到不可观测能力和家庭背景影响 \citep{card1999causal}。在中国语境下，\citet{zhang2005urban} 发现市场化改革时期城市教育回报上升，\citet{asadullah2020changing} 和 \citet{ma2021meta} 进一步说明教育回报会随时期、性别、户口、地区和部门而变化。
 
-此外，有两类新近文献对本文解释尤其重要。第一，利用高等教育扩招的准实验研究比普通横截面 OLS 更接近因果识别。例如，\citet{huang2022expansion} 利用中国高等教育扩招带来的教育机会变化估计教育回报，并强调户口差异会影响教育机会和收益。第二，教育收入关系并不一定只来自人力资本积累。\citet{li2023highereducation} 指出，中国高等教育的收益可能同时来自人力资本、信号机制和社会网络；\citet{li2025gender} 则说明教育回报与性别工资差距会受到部门分割影响。关于职业教育的研究也显示，不同教育轨道的回报存在动态差异 \citep{chen2024vocational}。CFPS 则为研究当代中国家庭与个人结果提供了重要数据基础，其抽样设计见 \citet{xie2015sampling}。本文基于 CFPS 2022 数据，对教育收入关系进行更新分析。
+高等教育扩招文献为因果识别提供了重要启发。\citet{huang2022expansion} 利用高等教育扩招考察教育回报及户口差异。本文借鉴这一政策思路，但不直接假定其在 CFPS 2022 横截面中有效，而是先检验 1981 年前后出生队列是否存在足够强的教育跳跃。根据回归断点设计的实践要求 \citep{imbens2008rd, lee2010rd}，如果局部第一阶段很弱，就不应将其作为主因果证据。
 
-\section{数据与变量}
+本文主要使用选择性可观测条件下的 AIPW 估计。AIPW 同时结合结果模型和倾向得分模型；在条件可忽略性成立时，只要其中一个模型设定正确，估计量仍可保持一致 \citep{bang2005doubly}。由于该假设无法直接检验，本文同时报告倾向得分重叠和平衡性改善情况。
 
-本文使用北京大学中国社会科学调查中心的 CFPS 2022 数据 \citep{cfps2022data}。样本处理步骤包括：保留 2022 年受访者；年龄限制在 18--64 岁；要求工资收入非缺失；并要求主要因变量、教育变量、年龄、年龄平方、性别、婚姻、城乡户口、医保和省份代码等核心变量非缺失。最终分析样本为 4,699 人。
+\section{数据与数据检查}
 
-主要因变量为 $\ln(\mathrm{wage}+1)$，其中 wage 表示个人年度工资收入。核心解释变量为受教育年限。控制变量包括年龄、年龄平方、性别、婚姻状态、农业户口、医保和省份固定效应。表 \ref{tab:desc} 展示描述性统计，表 \ref{tab:edu} 展示教育分类分布。
+本文使用 CFPS 2022 数据 \citep{xie2015sampling, cfps2022data}。原始数据包含 9,806 个观测值。样本处理包括保留 18--64 岁成年人、要求工资收入可得、并要求核心变量完整。表 \ref{tab:flow} 展示样本筛选过程。
+
+\begin{table}[H]
+\centering
+\caption{样本构造过程}
+\label{tab:flow}
+\input{tables/table_sample_flow_zh.tex}
+\end{table}
+
+主要因变量为 $\ln(\mathrm{wage}+1)$。连续教育变量为受教育年限；因果估计中的处理变量为是否完成大专及以上教育。表 \ref{tab:missing} 显示，工资变量缺失是样本减少的主要来源，而多数协变量缺失比例较低。工资的 99 分位数为 300,000 元，因此稳健性检验中加入工资缩尾口径。
+
+\begin{table}[H]
+\centering
+\caption{原始数据缺失情况检查}
+\label{tab:missing}
+\input{tables/table_missing_audit_zh.tex}
+\end{table}
 
 \begin{table}[H]
 \centering
@@ -69,26 +83,12 @@
 \input{tables/table_education_distribution_zh.tex}
 \end{table}
 
-\section{模型设定}
-
-基准模型如下：
-\begin{equation}
-\ln(\mathrm{wage}_i+1)=\alpha+\beta\,\mathrm{educ}_i+\gamma X_i+\mu_p+\varepsilon_i,
-\end{equation}
-其中 $\mathrm{educ}_i$ 为受教育年限，$X_i$ 为个体控制变量，$\mu_p$ 为省份固定效应。本文所有回归均使用稳健标准误。基准回归依次估计三个模型：仅包含教育年限的模型、加入人口学控制变量的模型、进一步加入省份固定效应的首选模型。稳健性检验包括使用家庭人均纯收入对数作为替代因变量，以及仅保留工资收入为正的样本。
-
-\section{实证结果}
-
-图 \ref{fig:distribution} 显示，样本主要集中在初中、高中、大专和本科教育层级。图 \ref{fig:wageedu} 进一步显示，平均对数工资随教育层级提高而上升。图 \ref{fig:fit} 使用受教育年限分组均值展示了类似的正向梯度。
-
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.86\textwidth]{figures/viz_education_distribution.png}
 \caption{分析样本的教育构成}
-\label{fig:distribution}
+\label{fig:education}
 \end{figure}
-
-图 \ref{fig:distribution} 显示，样本主要集中在初中、高中、大专和本科教育层级。值得注意的是，大专及以上受教育人口合计约占总样本的三分之一，反映出近年来高等教育普及程度的提高。
 
 \begin{figure}[H]
 \centering
@@ -97,117 +97,143 @@
 \label{fig:wageedu}
 \end{figure}
 
-图 \ref{fig:wageedu} 进一步显示，平均对数工资随教育层级的提高而上升。从初中到高中、从高中到大专，工资提升幅度较为明显；大专到本科阶段同样存在正的工资溢价。该图从描述性角度初步印证了教育与收入之间的正向关联。
+\section{实证策略}
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.86\textwidth]{figures/viz_binned_education_wage_fit.png}
-\caption{教育年限与工资收入的分组拟合关系}
-\label{fig:fit}
-\end{figure}
+\subsection{OLS 基准模型}
 
-图 \ref{fig:fit} 使用受教育年限分组均值展示了类似的正向梯度。这一图形证据与图 \ref{fig:wageedu} 保持一致，并在连续变量层面上进一步强化了教育与收入正相关的直观印象。
+基准模型为：
+\begin{equation}
+\ln(\mathrm{wage}_i+1)=\alpha+\beta E_i+\gamma X_i+\mu_p+\varepsilon_i,
+\end{equation}
+其中 $E_i$ 表示受教育年限或大专及以上教育，$X_i$ 为控制变量，$\mu_p$ 为省份固定效应。所有回归均使用稳健标准误。OLS 用作基准结果，但不直接解释为严格因果效应。
 
-表 \ref{tab:reg} 报告教育系数在不同模型中的估计结果。首选模型中，受教育年限系数为 0.0882，稳健标准误为 0.0062，在 1\% 水平显著。近似解释为：在控制人口学特征和省份固定效应后，教育年限每增加一年，工资收入平均约高 8.8\%。
+\subsection{双重稳健处理效应估计}
+
+本文的核心估计量是大专及以上教育的平均处理效应：
+\begin{equation}
+ATE=E[Y_i(1)-Y_i(0)].
+\end{equation}
+AIPW 个体得分为：
+\begin{equation}
+\hat{\tau}_i =
+\hat{m}_1(X_i)-\hat{m}_0(X_i)
++\frac{D_i(Y_i-\hat{m}_1(X_i))}{\hat{e}(X_i)}
+-\frac{(1-D_i)(Y_i-\hat{m}_0(X_i))}{1-\hat{e}(X_i)},
+\end{equation}
+其中 $D_i$ 表示是否完成大专及以上教育，$\hat{e}(X_i)$ 为倾向得分，$\hat{m}_d(X_i)$ 为处理状态 $d$ 下的预测收入。本文使用五折交叉拟合，并同时报告线性模型和梯度提升模型。首选设定控制年龄、性别、户口、城乡、婚姻、医保和省份；扩展设定进一步加入健康、家庭规模、社会地位、是否上网和就业状态。
+
+\subsection{扩招工具变量诊断}
+
+1999 年中国高等教育扩招提供了一个潜在政策冲击。本文用出生年份减 1981 作为 running variable，因为 1981 年出生队列在 1999 年大约 18 岁。若该设计有效，1981 年及以后出生应在教育水平上出现局部跳跃。本文在多个对称出生队列窗口中报告第一阶段和 IV 估计，以判断这一识别策略是否足够强。
+
+\section{实证结果}
+
+\subsection{OLS 基准结果}
+
+表 \ref{tab:reg} 显示，OLS 结果方向稳定。基础设定中，受教育年限系数为 0.088；加入更多控制变量后为 0.083。以大专及以上作为处理变量时，基础设定系数为 0.738，扩展设定为 0.694。
 
 \begin{table}[H]
 \centering
-\caption{不同模型中的教育系数}
+\caption{OLS 基准估计}
 \label{tab:reg}
 \input{tables/table_regression_education_returns_zh.tex}
 \begin{flushleft}
-\footnotesize 注：括号内为稳健标准误。M1 仅包含教育年限；M2 加入人口学控制变量；M3 进一步加入省份固定效应。Alt. income 使用 $\ln(\mathrm{inc1}+1)$ 为因变量。Positive wage 仅保留工资收入大于 0 的样本。$^{*}p<0.10$，$^{**}p<0.05$，$^{***}p<0.01$。
+\footnotesize 注：括号内为稳健标准误。基础控制变量包括年龄、年龄平方、性别、婚姻、农业户口、医保和省份固定效应；扩展控制变量进一步加入城乡、健康、家庭规模、是否上网和主观社会地位。$^{*}p<0.10$，$^{**}p<0.05$，$^{***}p<0.01$。
 \end{flushleft}
 \end{table}
-
-\subsection{假设检验}
-
-为了从统计推断角度正式检验教育与收入之间的关系，本文基于主模型（模型 3）对受教育年限的系数进行标准假设检验。零假设为 $H_0:\beta_{\mathrm{educ}}=0$，即在控制其他变量后，受教育年限与收入之间不存在统计显著关系；备择假设为 $H_1:\beta_{\mathrm{educ}}\neq 0$。
-
-根据回归结果，估计系数为 $\hat{\beta}_{\mathrm{educ}}=0.0882$，稳健标准误为 0.0062，因此检验统计量约为
-\[
-t=\frac{0.0882}{0.0062}\approx 14.23,
-\]
-对应 $p<0.001$。在 1\% 的显著性水平下，由于 $p<0.01$，本文拒绝零假设。结论是：在控制年龄、性别、婚姻、户口、医保和省份固定效应后，样本数据提供了充分统计证据，表明受教育年限与收入之间存在显著正相关关系。作为对照，对婚姻变量（mar）进行相同检验时，其 p 值约为 0.749，无法拒绝零假设，说明当前样本中婚姻状态与收入之间的统计关系并不显著。
-
-图 \ref{fig:coef} 汇总了不同设定下教育系数及其 95\% 稳健置信区间。可以看到，在加入控制变量和省份固定效应后，教育系数有所下降但仍显著为正。替代收入变量的教育系数为 0.0728，正工资样本的教育系数为 0.0788，均支持基准结论。
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.86\textwidth]{figures/viz_regression_coefficients.png}
-\caption{不同模型中的教育收入相关系数}
+\caption{不同模型中的教育收入系数}
 \label{fig:coef}
 \end{figure}
 
-\subsection{性别与户口异质性}
+\subsection{双重稳健估计}
 
-新近研究强调，中国教育回报并非在不同群体之间完全一致 \citep{ma2021meta, li2025gender}。为了提供一个紧凑的描述性检验，本文进一步按性别和户口状态分别估计首选模型。分组回归保留年龄、婚姻、医保和省份固定效应等控制变量，但在按某一变量分组时不再纳入该分组变量本身。
+表 \ref{tab:aipw} 报告 AIPW 结果。首选的 Core plus + GBM 估计为 0.710，标准误为 0.056。六组设定的估计范围为 0.669--0.773，说明结果并不依赖单一协变量组合或单一学习器。
+
+\begin{table}[H]
+\centering
+\caption{大专及以上教育的 AIPW 估计}
+\label{tab:aipw}
+\input{tables/table_aipw_effects_zh.tex}
+\begin{flushleft}
+\footnotesize 注：因变量为 $\ln(\mathrm{wage}+1)$。ATE 表示完成大专及以上教育的平均处理效应。Linear 使用逻辑回归/Ridge 结果模型；GBM 使用梯度提升模型。首选设定为 Core plus + GBM。
+\end{flushleft}
+\end{table}
+
+AIPW 的可信度取决于共同支撑和平衡性。图 \ref{fig:propensity} 显示处理组和对照组在较宽的倾向得分区间内存在重叠，但两端仍有少量样本。表 \ref{tab:balance} 和图 \ref{fig:balance} 显示，加权后核心协变量的标准化差异绝对值均降至 0.10 以下。
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.86\textwidth]{figures/viz_propensity_overlap.png}
+\caption{倾向得分共同支撑}
+\label{fig:propensity}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\caption{加权前后的协变量平衡性}
+\label{tab:balance}
+\input{tables/table_balance_zh.tex}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.80\textwidth]{figures/viz_balance_diagnostics.png}
+\caption{加权前后的标准化均值差异}
+\label{fig:balance}
+\end{figure}
+
+\subsection{弱工具变量诊断}
+
+图 \ref{fig:cohort} 展示 1981 年 cutoff 附近出生队列的大专及以上比例和平均教育年限。表 \ref{tab:iv} 显示，在 $\pm 5$ 到 $\pm 15$ 年的较窄窗口中，第一阶段 F 统计量远低于常用弱工具变量阈值。$\pm 20$ 年窗口的第一阶段较强，但窗口过宽，已经难以解释为局部断点。因此，扩招 IV 不作为本文主要因果证据。
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.86\textwidth]{figures/viz_cohort_first_stage.png}
+\caption{高等教育扩招 cutoff 附近的出生队列模式}
+\label{fig:cohort}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\caption{高等教育扩招 IV 诊断}
+\label{tab:iv}
+\input{tables/table_iv_diagnostics_zh.tex}
+\begin{flushleft}
+\footnotesize 注：工具变量为是否出生于 1981 年及以后，并控制线性 running variable、交互项和省份固定效应。较窄窗口中的第一阶段较弱，因此 IV 结果不应被解释为主要因果证据。
+\end{flushleft}
+\end{table}
+
+\subsection{异质性}
+
+表 \ref{tab:heterogeneity} 和图 \ref{fig:heterogeneity} 显示，女性样本中的教育系数高于男性，非农业户口样本中的教育系数高于农业户口样本。这与中国教育回报存在性别、户口、部门和地区差异的既有文献相一致 \citep{ma2021meta, li2025gender}。
 
 \begin{table}[H]
 \centering
 \caption{不同子样本中的教育系数}
 \label{tab:heterogeneity}
 \input{tables/table_heterogeneity_returns_zh.tex}
-\begin{flushleft}
-\footnotesize 注：每一行均为单独的稳健 OLS 回归。性别子样本回归不再控制性别变量；户口子样本回归不再控制农业户口变量。$^{*}p<0.10$，$^{**}p<0.05$，$^{***}p<0.01$。
-\end{flushleft}
 \end{table}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.86\textwidth]{figures/viz_heterogeneity_coefficients.png}
-\caption{性别与户口子样本中的教育收入相关系数}
+\includegraphics[width=0.82\textwidth]{figures/viz_heterogeneity_coefficients.png}
+\caption{性别与户口子样本中的教育收入系数}
 \label{fig:heterogeneity}
 \end{figure}
 
-表 \ref{tab:heterogeneity} 和图 \ref{fig:heterogeneity} 显示，教育收入关系存在明显异质性。女性样本中的教育系数高于男性样本，这与已有研究中“女性教育回报较高但仍面临更广泛劳动市场不平等”的发现相一致 \citep{ma2021meta, li2025gender}。非农业户口样本中的教育系数也高于农业户口样本，这说明户口制度和城市劳动力市场机会可能影响教育向收入优势的转化，和 \citet{huang2022expansion} 对高等教育扩招与户口差异的讨论相呼应。不过，这些分组结果仍应解释为描述性证据，因为它们来自较小的横截面子样本，而非严格因果识别。
+\section{讨论}
 
-\section{讨论与局限}
+新版实证相较于简单 OLS 有三点实质改进。第一，本文直接报告样本筛选和缺失情况，避免只展示最终回归样本。第二，本文将研究对象从“每增加一年教育”的相关关系扩展为“大专及以上教育”的处理效应，并使用双重稳健估计。第三，本文尝试政策型识别，但根据弱工具变量诊断保留谨慎解释，而不是为了创新而强行声称因果识别成功。
 
-本文基于 CFPS 2022 数据发现，中国成年人的受教育年限与收入之间存在显著且稳健的正相关关系。在控制人口学变量和省份固定效应后，教育年限每增加一年，工资收入平均约高 8.8\%。这一结果与人力资本理论预期一致，也与近年来基于中国数据的多数实证研究结论相符 \citep{asadullah2020changing, ma2021meta, huang2022expansion}。然而，在解释这一发现时，仍有几个方面值得进一步讨论。
-
-\subsection{相关关系与因果关系的距离}
-
-本文使用的横截面 OLS 方法无法完全克服由不可观测因素（如能力、动机、家庭背景、学校质量和职业选择等）带来的遗漏变量偏误。因此，8.8\% 的估计值应理解为条件相关关系，而非严格意义上的教育回报率。尽管稳健性检验支持结果方向的稳定性，但若要做出因果推断，未来研究可考虑工具变量法（如义务教育法改革）、断点回归或双重差分等准实验设计。正因如此，\citet{huang2022expansion} 这类利用高等教育扩招进行识别的研究，可以作为理解本文 OLS 估计局限的重要参照。
-
-\subsection{教育回报可能存在的异质性}
-
-本文估计的是平均关系，但教育回报很可能在不同群体之间存在差异。例如：
-
-\begin{itemize}
-  \item \textbf{性别：}女性教育回报是否高于男性？
-  \item \textbf{户口：}农业户口与非农业户口之间的回报是否存在差距？
-  \item \textbf{地区：}东部、中部、西部地区的教育回报是否不同？
-  \item \textbf{教育层级：}基础教育与高等教育的边际回报是否存在非线性特征？
-\end{itemize}
-
-本文新增的分组结果说明，上述问题并不只是概念上的可能性。CFPS 2022 样本中已经可以看到性别和户口差异，这与中国教育回报异质性的既有证据相一致 \citep{ma2021meta, li2025gender}。更完整的研究可以进一步加入交互项，并考察教育回报是否因省份、就业部门、职业类型和教育轨道不同而变化。
-
-\subsection{劳动力市场结构与制度环境的影响}
-
-教育对收入的影响并非仅由供给端的教育水平决定，还取决于劳动力市场的需求结构。如果市场中高质量就业岗位不足，或存在严重的户籍分割、行业垄断、就业歧视等问题，教育的实际回报可能被压低。关于高等教育的最新研究还显示，大学教育的收益可能不仅来自技能提升，也可能来自信号机制和社会网络 \citep{li2023highereducation}。因此，教育政策应与产业政策、就业政策和户籍改革等协同推进，才能更充分地释放人力资本的收入提升潜力。
-
-\subsection{变量测量与样本代表性}
-
-本文使用的工资收入为自报数据，可能存在测量误差；同时，分析样本限于工资收入和控制变量非缺失的成年人，可能排除了无工资收入者（如自雇、务农、失业等群体），这在一定程度上限制了结论的外部有效性。未来研究可进一步拓展到更广泛的收入口径（如总个人收入、家庭人均收入）和更多样的就业类型。
-
-\subsection{研究贡献与可复现性}
-
-尽管存在上述局限，本文的价值在于使用较新的 CFPS 2022 微观数据，提供一套结构清晰、可复现的实证分析流程（包括 Stata、Python 和 LaTeX 文件组织），并明确区分相关性与因果性。这为后续研究者提供了一个可以直接扩展或修改的基准框架。
-
-\section{政策启示}
-
-上述发现表明，教育仍然是中国劳动力市场中影响收入水平的重要因素。基于本文约 8.8\% 的教育收入相关估计，本文提出三点政策启示。
-
-第一，继续扩大教育投入具有明确的经济合理性。对于个人而言，教育仍然是实现收入提升的有效路径；对于公共政策而言，持续保障基础教育普及、稳步扩大高中和高等教育机会，有助于从整体上提高劳动力素质，并为缩小收入差距创造有利条件。
-
-第二，教育政策应与劳动力市场政策协同推进。教育提高收入的前提是劳动力市场能够有效配置和回报高技能人才。如果产业结构升级滞后、高质量就业岗位不足或劳动力市场存在制度性分割，教育的人力资本价值可能无法得到充分实现。职业教育方面的证据尤其重要：\citet{chen2024vocational} 表明不同教育轨道的回报存在差异，说明单纯扩大教育数量并不足够，教育质量和劳动市场需求匹配同样关键。因此，教育投入需要与就业促进政策、产业升级规划、职业教育质量提升和区域协调发展形成合力，才能更充分地释放教育对收入的提升作用。
-
-第三，关注教育回报的群体差异，为精准施策预留空间。本文估计的是平均关系，但既有文献提示，教育回报可能因性别、户口类型、地区及教育层级的不同而有所差异。未来制定具体教育干预措施时，可结合更细致的本地证据，避免“一刀切”式政策设计，使教育资源向回报潜力较高的领域和群体适度倾斜。
+本文仍有局限。AIPW 依赖可观测变量调整，而当前数据文件缺少能力、父母教育、童年家庭资源和学校质量等重要变量。因此，首选估计应理解为选择性可观测条件下的双重稳健处理效应，而不是完全等同于随机实验或强工具变量估计。扩招 IV 的弱第一阶段也说明，仅凭当前横截面数据不宜做过强的政策因果结论。
 
 \section{结论}
 
-基于 CFPS 2022 数据，本文发现教育水平与中国成年人收入之间存在稳定正相关。在控制人口学变量和省份固定效应后，受教育年限每增加一年，工资收入平均约高 8.8\%。这一结果说明教育仍然是理解中国劳动市场收入差异的重要因素。但由于识别策略基于横截面 OLS，本文结论应定位为教育与收入之间的条件相关关系，而非严格因果回报估计。
+基于 CFPS 2022，本文发现教育与中国成年人收入之间存在显著正向关系。传统明瑟模型中，受教育年限每增加一年，工资收入约高 8.8\%。更重要的是，AIPW 结果显示，在平衡可观测协变量后，大专及以上教育对应约 0.71 个对数点的工资收入优势。该结果在不同协变量口径和学习器下保持稳定，且加权后协变量平衡明显改善。本文因此提供了一份比单纯 OLS 更有创新性、实证更扎实、并明确做过数据检查的教育收入研究。
 
 \bibliographystyle{plainnat}
 \bibliography{references}

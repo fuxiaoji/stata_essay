@@ -80,7 +80,7 @@ DATA_DONE_ROOT="新的/Data_done/绝对路径" stata-mp -b do 02_do/00_master.do
 在项目根目录运行：
 
 ```bash
-python3 Data_done/02_do/05_publication_outputs.py
+uv run --with pandas --with pyreadstat --with statsmodels --with matplotlib --with numpy --with linearmodels --with scikit-learn python Data_done/02_do/05_publication_outputs.py
 ```
 
 运行后会生成：
@@ -88,6 +88,8 @@ python3 Data_done/02_do/05_publication_outputs.py
 - `05_latex/figures/viz_*.png`
 - `05_latex/tables/table_*.tex`
 - `05_latex/analysis_summary.json`
+
+新版论文级脚本会从 `01_data/source.dta` 重新读取原始数据，并输出数据审计、OLS 基准回归、AIPW 双重稳健估计、倾向得分重叠/平衡性检查、1999 年高等教育扩招的弱工具变量诊断，以及对应的图表。
 
 ### 3. 复现最终报告
 
@@ -124,7 +126,12 @@ xelatex education_income_zh.tex
 xelatex education_income_zh.tex
 ```
 
-当前机器的命令行 `PATH` 中未发现 LaTeX 编译器，因此本次交付生成 `.tex` 源文件，但未在本机编译 PDF。
+当前机器已使用 `latexmk -xelatex` 成功编译英文和中文 PDF。若已安装 TinyTeX/MacTeX，可直接运行：
+
+```bash
+cd Data_done/05_latex
+latexmk -xelatex -interaction=nonstopmode -halt-on-error education_income_en.tex education_income_zh.tex
+```
 
 ## 三、核心结论
 
@@ -132,9 +139,9 @@ xelatex education_income_zh.tex
 
 加入省份固定效应后，模型能够控制不同省份之间相对稳定的地区发展水平、劳动力市场结构、工资水平和公共资源差异，从而减少地区层面差异对教育收入关系估计的干扰。
 
-稳健性检验从教育变量定义、收入变量定义和样本筛选口径三个角度展开。使用教育分类变量替代教育年限、使用 `lninc1 = ln(inc1 + 1)` 替代 `lnwage`、以及仅保留正工资样本后，教育变量系数均保持显著为正，说明基准结论较为稳健。
+新版论文进一步将“大专及以上教育”定义为处理变量，并使用五折交叉拟合的 AIPW 双重稳健估计。首选 Core plus + GBM 设定下，完成大专及以上教育的平均处理效应为 `0.7103` 个对数点，稳健性估计范围为 `0.6690` 至 `0.7726`。倾向得分加权后，核心协变量的标准化均值差异均降至 `0.10` 以下。
 
-由于本文使用横截面数据和常规 OLS 回归，结果应理解为教育水平与收入之间的条件相关关系，不能直接解释为严格因果效应。
+本文也尝试使用 1999 年高等教育扩招作为工具变量/断点型政策暴露，但窄出生队列窗口中的第一阶段 F 统计量很低，因此论文将其作为弱工具变量诊断，而不将其包装为主要因果证据。由于 AIPW 仍依赖可观测变量调整，结果应理解为选择性可观测条件下的处理效应估计，而不是完全等同于随机实验或强工具变量估计。
 
 ## 四、文件完整性说明
 

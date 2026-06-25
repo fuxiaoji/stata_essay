@@ -5,7 +5,6 @@
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{caption}
-\usepackage{subcaption}
 \usepackage{float}
 \usepackage{hyperref}
 \usepackage{xurl}
@@ -19,47 +18,62 @@
   urlcolor=blue
 }
 \Urlmuskip=0mu plus 2mu\relax
-
 \onehalfspacing
 
-\title{Does Education Raise Adult Income in China?\\Evidence from CFPS 2022}
+\title{Does Education Raise Adult Income in China?\\Data Audit, Doubly Robust Evidence, and Weak-IV Diagnostics from CFPS 2022}
 \author{Empirical Essay}
-\date{May 31, 2026}
+\date{June 25, 2026}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-This paper examines the association between education and income among working-age adults in China using the CFPS 2022 analytic sample. The sample is restricted to adults aged 18--64 with non-missing wage income and core covariates, yielding 4,699 observations. The main dependent variable is $\ln(\mathrm{wage}+1)$, and the key explanatory variable is years of education. Ordinary least squares models with robust standard errors are estimated sequentially with demographic controls and province fixed effects. The preferred specification estimates an education coefficient of 0.0882, significant at the 1 percent level, implying that one additional year of schooling is associated with roughly 8.8 percent higher wage income, conditional on observed controls. Robustness checks using education categories, an alternative household-income outcome, and a positive-wage subsample preserve the positive association. Because the design relies on cross-sectional observational data, the estimates should be interpreted as conditional associations rather than strict causal effects.
+This paper re-examines whether education raises adult income in China using CFPS 2022 microdata. Compared with a conventional Mincer regression, the paper makes three improvements. First, it reports an explicit data-quality audit, including sample selection, missingness, outlier handling, and overlap checks. Second, it shifts the main estimand from a purely correlational marginal schooling coefficient to the average treatment effect of completing college or above. The effect is estimated using cross-fitted augmented inverse probability weighting (AIPW), a doubly robust causal-inference estimator. Third, it tests, rather than assumes, whether the 1999 higher-education expansion can be used as an instrumental-variable strategy in this sample. The final analytic sample contains 4,699 working-age adults. OLS estimates show that one additional year of schooling is associated with 8.8 percent higher wage income, and college-or-above education is associated with about 0.74 log points higher wage income. The preferred AIPW estimate is 0.710 log points, with robustness estimates ranging from 0.669 to 0.773. Balance diagnostics show that weighting sharply reduces observed differences in age, gender, hukou status, urban residence, marriage, and medical insurance. However, the expansion-based IV design has a weak first stage in narrow cohort windows, so it is reported as a diagnostic rather than the main causal result. The evidence supports a large positive education-income association and a credible selection-on-observables treatment-effect estimate, while remaining cautious about stronger causal claims.
 \end{abstract}
 
-\noindent\textbf{Keywords:} education, income, CFPS, China, Mincer equation, returns to schooling
+\noindent\textbf{Keywords:} education, income, CFPS, China, AIPW, causal inference, higher-education expansion
 
 \section{Introduction}
 
-Education is central to modern labor-market inequality because it can raise productive skills, improve job matching, and expand access to higher-paying occupations. The human-capital tradition treats schooling as an investment that can increase future earnings \citep{becker1964human, mincer1974schooling}. At the same time, estimating the effect of education is empirically difficult because schooling choices are correlated with family background, ability, location, and labor-market opportunities \citep{card1999causal, angrist1991compulsory}.
+Education is one of the most important mechanisms through which individuals gain access to higher-paying jobs. Human-capital theory predicts that schooling raises productivity and therefore earnings \citep{becker1964human, mincer1974schooling}. Yet estimating the return to education is difficult because schooling is not randomly assigned. Family background, ability, local labor-market conditions, and institutional barriers may jointly affect both education and income \citep{card1999causal, heckman2008earnings}.
 
-This paper asks a focused empirical question: in the CFPS 2022 adult sample, is higher education associated with higher income after controlling for observable demographic and regional differences? The answer is yes. The preferred model shows a large and statistically precise positive association between years of education and log wage income. The analysis, however, is intentionally cautious about interpretation: the results document a robust conditional correlation, not a causal return to schooling.
+The earlier version of this project answered a narrower question: whether education and income are positively correlated in CFPS 2022. That answer was yes, but the empirical design was not innovative enough because it relied mainly on OLS. This revised paper changes the design in three ways. First, it documents the data-cleaning process and reports missingness, sample selection, outliers, and propensity-score overlap. Second, it estimates the treatment effect of college-or-above education using a doubly robust AIPW estimator \citep{hirano2003efficient, bang2005doubly}. Third, it examines a policy-based identification idea based on China's 1999 higher-education expansion, but keeps it as a diagnostic because the local first stage is weak in this CFPS sample.
 
-\section{Literature}
+The paper's contribution is therefore not a claim of perfect causal identification. Rather, it provides a stronger and more transparent empirical design: OLS is used as a benchmark, AIPW is used as the main causal-inference estimate under conditional ignorability, and the expansion-based IV/RD attempt is evaluated with first-stage diagnostics rather than assumed to work.
 
-The empirical specification follows the Mincerian earnings-function framework, in which log earnings are modeled as a function of schooling and labor-market experience \citep{mincer1974schooling}. Human-capital theory provides the economic mechanism behind this relationship: schooling may raise earnings by increasing skills and productivity \citep{becker1964human}. Later work emphasizes that OLS estimates may be biased if unobserved ability or family background affects both education and earnings; quasi-experimental approaches are therefore important for causal interpretation \citep{card1999causal, angrist1991compulsory, heckman2008earnings}.
+\section{Literature and Identification}
 
-Evidence from China also finds substantial education-income gradients, especially during market-oriented reforms. \citet{zhang2005urban} document rising economic returns to schooling in urban China from 1988 to 2001. More recent evidence suggests that the education premium has continued to evolve with structural change in the labor market: \citet{asadullah2020changing} show that wage returns to education changed during 2010--2015, while the large meta-analysis by \citet{ma2021meta} confirms a positive return to schooling in China and documents heterogeneity across gender, hukou status, sector, region, and time period.
+The empirical starting point is the Mincer earnings function \citep{mincer1974schooling}. A large literature finds that education is positively associated with earnings, but also stresses that OLS can be biased by unobserved ability or background \citep{card1999causal}. For China, \citet{zhang2005urban} document rising returns to schooling during the market transition, while \citet{asadullah2020changing} and \citet{ma2021meta} show that returns vary across time, gender, hukou, region, and sector.
 
-Two recent strands are particularly relevant for interpreting the present results. First, quasi-experimental work using the great higher-education expansion provides stronger causal evidence than standard cross-sectional OLS. \citet{huang2022expansion}, for example, use the expansion as a source of variation and find sizable earnings returns to education, while also emphasizing hukou-related differences in access and gains. Second, studies of mechanisms and labor-market segmentation show that the education-income link may not be purely a human-capital channel. \citet{li2023highereducation} argue that the value of higher education in China may reflect human capital, signaling, and social networks, while \citet{li2025gender} show that education returns and the gender wage gap differ by sector. Research on vocational education further indicates that returns can vary by educational track and over time \citep{chen2024vocational}. This paper contributes a compact update using CFPS 2022 microdata, a nationally oriented survey whose sampling design is documented by \citet{xie2015sampling}.
+Recent work on China's higher-education expansion is especially relevant. \citet{huang2022expansion} use the great expansion to study returns to education and hukou-related differences. This paper borrows that policy intuition but verifies whether the available CFPS 2022 cross-section supports a strong first stage. The answer is mixed: broad cohort windows show a large education jump, but narrow local windows do not. Following standard RD guidance \citep{imbens2008rd, lee2010rd}, the policy design is therefore not treated as the main source of identification.
 
-\section{Data and Variables}
+The main causal framework is instead selection on observables. AIPW combines an outcome model and a propensity-score model, and remains consistent if either nuisance model is correctly specified under conditional ignorability \citep{bang2005doubly}. Because this assumption is not directly testable, the paper reports overlap and balance diagnostics and treats the estimates as more credible than OLS but still weaker than a clean randomized or strong-IV design.
 
-The analysis uses CFPS 2022 data from the Institute of Social Science Survey at Peking University \citep{cfps2022data}. The sample keeps 2022 respondents aged 18--64, requires non-missing wage income, and drops observations missing the main outcome, education, demographic controls, medical-insurance indicator, or province code. The final analytic sample contains 4,699 observations.
+\section{Data and Audit}
 
-The dependent variable is $\ln(\mathrm{wage}+1)$, where wage is annual individual wage income. The core explanatory variable is years of education. Controls include age, age squared, gender, marital status, rural hukou, medical insurance, and province fixed effects. Table~\ref{tab:desc} reports descriptive statistics, and Table~\ref{tab:edu} reports the education composition of the analytic sample.
+The data come from CFPS 2022 \citep{xie2015sampling, cfps2022data}. The initial file has 9,806 observations. The analytic sample keeps adults aged 18--64, requires wage income to be observed, and drops observations missing the core variables used in the main models. Table~\ref{tab:flow} reports the sample flow.
+
+\begin{table}[H]
+\centering
+\caption{Sample Construction}
+\label{tab:flow}
+\input{tables/table_sample_flow.tex}
+\end{table}
+
+The main outcome is $\ln(\mathrm{wage}+1)$. The continuous education variable is years of schooling. The treatment variable for causal estimation is an indicator equal to one if the respondent completed college or above. Table~\ref{tab:missing} shows that wage availability is the main source of sample loss, while most covariates have limited missingness. The 99th percentile of wage is 300,000 yuan, so a winsorized-wage robustness check is included.
+
+\begin{table}[H]
+\centering
+\caption{Missingness Audit in the Source Data}
+\label{tab:missing}
+\input{tables/table_missing_audit.tex}
+\end{table}
 
 \begin{table}[H]
 \centering
 \caption{Descriptive Statistics}
 \label{tab:desc}
-\input{tables/table_descriptive_statistics.tex}
+\resizebox{\textwidth}{!}{\input{tables/table_descriptive_statistics.tex}}
 \end{table}
 
 \begin{table}[H]
@@ -69,26 +83,12 @@ The dependent variable is $\ln(\mathrm{wage}+1)$, where wage is annual individua
 \input{tables/table_education_distribution.tex}
 \end{table}
 
-\section{Empirical Strategy}
-
-The baseline model is
-\begin{equation}
-\ln(\mathrm{wage}_i+1)=\alpha+\beta\,\mathrm{educ}_i+\gamma X_i+\mu_p+\varepsilon_i,
-\end{equation}
-where $\mathrm{educ}_i$ is years of education, $X_i$ contains individual controls, and $\mu_p$ denotes province fixed effects. Robust standard errors are used throughout. Three baseline specifications are estimated: a bivariate model, a model adding demographic controls, and a preferred model adding province fixed effects. Robustness checks replace the income outcome with $\ln(\mathrm{inc1}+1)$ and restrict the sample to respondents with positive wage income.
-
-\section{Results}
-
-Figure~\ref{fig:distribution} shows that junior-high, high-school, college, and bachelor's groups account for most of the analytic sample. Figure~\ref{fig:wageedu} displays a clear upward gradient in mean log wage income across education categories. The same pattern appears when education is represented as years of schooling in Figure~\ref{fig:fit}.
-
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.86\textwidth]{figures/viz_education_distribution.png}
 \caption{Education composition of the analytic sample}
-\label{fig:distribution}
+\label{fig:education}
 \end{figure}
-
-Figure~\ref{fig:distribution} shows that respondents are mainly distributed across junior high school, senior high school, college, and bachelor's degree categories. Notably, respondents with college education or above account for roughly one-third of the analytic sample, reflecting the broader accessibility of higher education in recent years.
 
 \begin{figure}[H]
 \centering
@@ -97,117 +97,143 @@ Figure~\ref{fig:distribution} shows that respondents are mainly distributed acro
 \label{fig:wageedu}
 \end{figure}
 
-Figure~\ref{fig:wageedu} further illustrates that average log wage income rises with educational attainment. The increase is especially visible from junior high school to senior high school and from senior high school to college, while a positive wage premium is also observed from college to bachelor's degree. This pattern provides descriptive evidence for a positive education-income association.
+\section{Empirical Strategy}
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.86\textwidth]{figures/viz_binned_education_wage_fit.png}
-\caption{Binned education-wage gradient}
-\label{fig:fit}
-\end{figure}
+\subsection{OLS Benchmark}
 
-Figure~\ref{fig:fit} presents a similar positive gradient based on grouped mean values by years of schooling. This graphical evidence is consistent with Figure~\ref{fig:wageedu} and reinforces the same relationship using education as a continuous variable.
+The benchmark model is
+\begin{equation}
+\ln(\mathrm{wage}_i+1)=\alpha+\beta E_i+\gamma X_i+\mu_p+\varepsilon_i,
+\end{equation}
+where $E_i$ is either years of schooling or college-or-above status, $X_i$ includes demographic and household controls, and $\mu_p$ denotes province fixed effects. Robust standard errors are used throughout. These regressions are useful benchmarks, but they are not interpreted as fully causal.
 
-Table~\ref{tab:reg} presents the main regression estimates. The preferred specification with demographic controls and province fixed effects estimates an education coefficient of 0.0882 with a robust standard error of 0.0062. The coefficient is significant at the 1 percent level. Interpreted approximately, one additional year of education is associated with about 8.8 percent higher wage income, conditional on the included controls.
+\subsection{Doubly Robust Treatment-Effect Estimation}
+
+The main estimand is the average treatment effect of college-or-above education:
+\begin{equation}
+ATE=E[Y_i(1)-Y_i(0)].
+\end{equation}
+The AIPW score is
+\begin{equation}
+\hat{\tau}_i =
+\hat{m}_1(X_i)-\hat{m}_0(X_i)
++\frac{D_i(Y_i-\hat{m}_1(X_i))}{\hat{e}(X_i)}
+-\frac{(1-D_i)(Y_i-\hat{m}_0(X_i))}{1-\hat{e}(X_i)},
+\end{equation}
+where $D_i$ indicates college-or-above education, $\hat{e}(X_i)$ is the estimated propensity score, and $\hat{m}_d(X_i)$ is the predicted outcome under treatment status $d$. The paper uses five-fold cross-fitting and reports both linear and gradient-boosting nuisance models. The preferred specification uses age, gender, hukou, urban residence, marriage, medical insurance, and province. Extended specifications add health, household size, social status, internet use, and employment status as sensitivity controls.
+
+\subsection{Expansion-Based IV Diagnostic}
+
+China's higher-education expansion began in 1999. A natural idea is to use cohort exposure around the college-entry age as an instrument for education. The forcing variable is birth year minus 1981, because the 1981 birth cohort was approximately 18 in 1999. The diagnostic specification estimates whether being born in or after 1981 creates a discontinuous increase in schooling within symmetric cohort windows. This design would be useful only if the first stage is strong and local. The paper therefore reports first-stage coefficients and F-statistics before interpreting the IV estimates.
+
+\section{Results}
+
+\subsection{OLS Benchmarks}
+
+Table~\ref{tab:reg} shows that the conventional estimates are large and stable. One additional year of schooling is associated with 0.088 log points higher wage income in the basic specification and 0.083 log points in the richer specification. College-or-above education is associated with 0.738 log points higher wage income in the basic specification and 0.694 log points with richer controls.
 
 \begin{table}[H]
 \centering
-\caption{Education Coefficients Across Specifications}
+\caption{OLS Benchmark Estimates}
 \label{tab:reg}
 \input{tables/table_regression_education_returns.tex}
 \begin{flushleft}
-\footnotesize Notes: Robust standard errors are in parentheses. M1 includes only years of education. M2 adds demographic controls. M3 adds province fixed effects. Alt. income uses $\ln(\mathrm{inc1}+1)$ as the dependent variable. Positive wage restricts the sample to wage $>0$. $^{*}p<0.10$, $^{**}p<0.05$, $^{***}p<0.01$.
+\footnotesize Notes: Robust standard errors are in parentheses. Basic controls include age, age squared, gender, marriage, rural hukou, medical insurance, and province fixed effects. Rich controls additionally include urban residence, health, household size, internet use, and subjective social status. $^{*}p<0.10$, $^{**}p<0.05$, $^{***}p<0.01$.
 \end{flushleft}
 \end{table}
-
-\subsection{Hypothesis Testing}
-
-To formally test the relationship between education and income, this paper conducts a standard hypothesis test on the coefficient of years of schooling in the preferred model. The null hypothesis is $H_0:\beta_{\mathrm{educ}}=0$, meaning that years of schooling have no statistically significant association with income after controlling for the other variables. The alternative hypothesis is $H_1:\beta_{\mathrm{educ}}\neq 0$.
-
-Based on Model 3, the estimated coefficient is $\hat{\beta}_{\mathrm{educ}}=0.0882$ and the robust standard error is 0.0062. The implied test statistic is approximately
-\[
-t=\frac{0.0882}{0.0062}\approx 14.23,
-\]
-with $p<0.001$. At the 1 percent significance level, the null hypothesis is rejected. The sample therefore provides strong statistical evidence that years of schooling are positively associated with income after controlling for age, gender, marital status, hukou status, medical insurance, and province fixed effects. As a comparison, applying the same logic to marital status in Model 3 yields a p-value of about 0.749, so the relationship between marital status and income is not statistically significant in this sample.
-
-Figure~\ref{fig:coef} summarizes the education coefficients and their 95 percent robust confidence intervals. The positive association remains stable after adding controls and remains positive in both robustness checks. The alternative household-income outcome produces a smaller coefficient of 0.0728, while the positive-wage subsample gives 0.0788.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.86\textwidth]{figures/viz_regression_coefficients.png}
-\caption{Education-income association across specifications}
+\caption{Regression coefficients across specifications}
 \label{fig:coef}
 \end{figure}
 
-\subsection{Heterogeneity by Gender and Hukou}
+\subsection{Doubly Robust Estimates}
 
-Recent studies emphasize that education returns in China are not uniform across groups \citep{ma2021meta, li2025gender}. To provide a compact descriptive check, this paper re-estimates the preferred specification separately by gender and hukou status. These subsample regressions keep the same age, marital-status, medical-insurance, and province controls, but omit the grouping variable used to split the sample.
+Table~\ref{tab:aipw} reports the main AIPW results. The preferred core-plus GBM estimate is 0.710 log points with a standard error of 0.056. Across six specifications, estimates range from 0.669 to 0.773 log points. The magnitude is close to the OLS college coefficient, which suggests that the college-income premium is not driven only by the particular parametric OLS specification.
+
+\begin{table}[H]
+\centering
+\caption{AIPW Estimates for College-or-Above Education}
+\label{tab:aipw}
+\input{tables/table_aipw_effects.tex}
+\begin{flushleft}
+\footnotesize Notes: The outcome is $\ln(\mathrm{wage}+1)$. ATE is the estimated average treatment effect of completing college or above. Linear uses logistic/Ridge nuisance models; GBM uses gradient boosting. The preferred specification is Core plus with GBM.
+\end{flushleft}
+\end{table}
+
+The credibility of AIPW depends on overlap and balance. Figure~\ref{fig:propensity} shows that treatment and control units share a broad common propensity-score region, although a small number of observations lie near the tails. Table~\ref{tab:balance} and Figure~\ref{fig:balance} show that weighting reduces absolute standardized differences for core covariates to below 0.10.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.86\textwidth]{figures/viz_propensity_overlap.png}
+\caption{Propensity-score overlap}
+\label{fig:propensity}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\caption{Covariate Balance Before and After Weighting}
+\label{tab:balance}
+\input{tables/table_balance.tex}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.80\textwidth]{figures/viz_balance_diagnostics.png}
+\caption{Standardized mean differences before and after weighting}
+\label{fig:balance}
+\end{figure}
+
+\subsection{Weak-IV Diagnostic}
+
+Figure~\ref{fig:cohort} plots college completion and average schooling by birth cohort around the 1981 cutoff. Table~\ref{tab:iv} reports the formal first-stage and IV diagnostics. In narrow windows of $\pm 5$ to $\pm 15$ years, the first-stage F-statistics are far below conventional weak-instrument thresholds. The $\pm 20$ window has a strong first stage, but it is no longer a credible local discontinuity because it spans a wide range of cohorts and life-cycle positions. The policy-based IV design is therefore not used as the main causal estimate.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.86\textwidth]{figures/viz_cohort_first_stage.png}
+\caption{Cohort pattern around the expansion eligibility cutoff}
+\label{fig:cohort}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\caption{Higher-Education Expansion IV Diagnostics}
+\label{tab:iv}
+\input{tables/table_iv_diagnostics.tex}
+\begin{flushleft}
+\footnotesize Notes: The instrument is an indicator for birth year 1981 or later, with linear running variable controls and province fixed effects. The weak first stage in narrow windows means the IV results should not be read as the main causal evidence.
+\end{flushleft}
+\end{table}
+
+\subsection{Heterogeneity}
+
+Education-income associations are stronger for women than men and stronger for non-rural hukou holders than rural hukou holders. This is consistent with recent evidence that education returns in China vary by gender, hukou, sector, and region \citep{ma2021meta, li2025gender}.
 
 \begin{table}[H]
 \centering
 \caption{Heterogeneous Education Coefficients}
 \label{tab:heterogeneity}
 \input{tables/table_heterogeneity_returns.tex}
-\begin{flushleft}
-\footnotesize Notes: Each row reports a separate robust OLS regression using the preferred control set. Gender-specific models omit the gender indicator because the sample is split by gender. Hukou-specific models omit the rural-hukou indicator. $^{*}p<0.10$, $^{**}p<0.05$, $^{***}p<0.01$.
-\end{flushleft}
 \end{table}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.86\textwidth]{figures/viz_heterogeneity_coefficients.png}
+\includegraphics[width=0.82\textwidth]{figures/viz_heterogeneity_coefficients.png}
 \caption{Education-income association by gender and hukou subsample}
 \label{fig:heterogeneity}
 \end{figure}
 
-Table~\ref{tab:heterogeneity} and Figure~\ref{fig:heterogeneity} show clear heterogeneity. The education coefficient is larger for women than for men, which is consistent with evidence that women often obtain relatively high returns to schooling even while facing broader labor-market inequality \citep{ma2021meta, li2025gender}. The coefficient is also larger among non-rural hukou holders than among rural hukou holders. This pattern echoes the argument that institutional segmentation, including hukou-based constraints, can shape both access to education and the conversion of education into earnings \citep{huang2022expansion}. These subgroup results should still be read descriptively, because they are based on smaller cross-sectional subsamples rather than a causal design.
+\section{Discussion}
 
-\section{Discussion and Limitations}
+The revised evidence is stronger than a simple OLS paper in three respects. First, the analysis documents the sample construction and missing-data problem directly. Second, it estimates a treatment effect for a clear education threshold, rather than only a marginal association per year of schooling. Third, it tests a policy-based IV idea and rejects it as the main strategy when the first stage is weak.
 
-Based on CFPS 2022 data, this paper finds a significant and robust positive correlation between years of schooling and income among Chinese adults. After controlling for demographic variables and province fixed effects, each additional year of education is associated with an average wage increase of approximately 8.8 percent. This finding is consistent with human-capital theory and with recent empirical studies based on Chinese data \citep{asadullah2020changing, ma2021meta, huang2022expansion}. Several points deserve further discussion.
-
-\subsection{Correlation Versus Causation}
-
-The cross-sectional OLS method used in this paper cannot fully overcome omitted-variable bias from unobserved factors such as ability, motivation, family background, school quality, and occupational choice. Therefore, the 8.8 percent estimate should be understood as a conditional association rather than a strict rate of return to education. Although the robustness checks support the stability of the result's direction, future research aiming for causal inference could consider quasi-experimental designs such as instrumental variables based on compulsory-education reforms, regression-discontinuity designs, or difference-in-differences methods. This is why studies such as \citet{huang2022expansion}, which exploit the higher-education expansion for identification, are useful benchmarks for interpreting the limitations of standard OLS estimates.
-
-\subsection{Potential Heterogeneity}
-
-This paper estimates an average association, but education returns may vary across groups. Important extensions include the following:
-
-\begin{itemize}
-  \item \textbf{Gender:} Are returns to education higher for women than for men?
-  \item \textbf{Hukou status:} Is there a gap between agricultural and non-agricultural hukou holders?
-  \item \textbf{Region:} Do returns to education differ across eastern, central, and western China?
-  \item \textbf{Education level:} Are marginal returns nonlinear between basic education and higher education?
-\end{itemize}
-
-The subgroup estimates reported above suggest that these questions are not merely conceptual. Gender and hukou differences appear in the CFPS 2022 sample, and they are consistent with broader evidence on segmented education returns in China \citep{ma2021meta, li2025gender}. A fuller analysis would formally test interactions and explore whether education premiums differ by province, employment sector, occupation, and education track.
-
-\subsection{Labor-Market Structure and Institutions}
-
-The income effect of education is not determined only by the supply side of human capital; it also depends on labor-market demand. If high-quality jobs are scarce, or if hukou segmentation, industry monopolies, or employment discrimination remain severe, the realized returns to education may be suppressed. Recent research on higher education also suggests that returns may reflect signaling and social networks as well as skills \citep{li2023highereducation}. Education policy should therefore be coordinated with industrial policy, employment policy, and hukou reform to more fully realize the income-enhancing potential of human capital.
-
-\subsection{Measurement and Representativeness}
-
-The wage income used in this paper is self-reported and may contain measurement error. In addition, the analytic sample is limited to adults with wage income and non-missing control variables, potentially excluding people without wage income, such as self-employed workers, farmers, and unemployed individuals. This limitation may affect the external validity of the conclusions. Future research could extend the analysis to broader income measures, such as total personal income or household per-capita income, and to more diverse employment types.
-
-\subsection{Contribution and Reproducibility}
-
-Despite these limitations, the value of this paper lies in its use of relatively recent CFPS 2022 microdata and a clearly structured, reproducible workflow that includes Stata, Python, and LaTeX files. By distinguishing correlation from causation, the paper provides a benchmark framework that can be directly extended or modified in subsequent research.
-
-\section{Policy Implications}
-
-The findings indicate that education remains a key factor affecting income levels in China's labor market. Based on the estimated education-income association of approximately 8.8 percent, three policy implications follow.
-
-First, continued investment in education has clear economic rationale. For individuals, education remains an effective path to income growth. For public policy, sustaining universal basic education and steadily expanding access to senior high school and higher education can improve the overall quality of the labor force and create conditions for narrowing income gaps.
-
-Second, education policy should be coordinated with labor-market policy. Education can raise income only when the labor market efficiently allocates and rewards skilled workers. If industrial upgrading lags behind, high-quality jobs are insufficient, or institutional segmentation persists, the human-capital value of education may not be fully realized. The evidence on vocational education is especially relevant here: \citet{chen2024vocational} show that returns differ across educational tracks, which implies that expanding education quantity alone is not enough unless training quality and labor-market demand are aligned. Educational investment should therefore be connected with employment promotion, industrial upgrading, vocational training quality, and coordinated regional development.
-
-Third, policymakers should pay attention to group differences in returns to education. This paper estimates an average relationship, but prior literature suggests that returns may vary by gender, hukou status, region, and education level. Future policy design should use more localized evidence, avoid one-size-fits-all interventions, and direct educational resources toward groups and sectors with greater return potential.
+The main limitation is that AIPW still depends on observed covariates. CFPS 2022 lacks direct measures of ability, parental education in the working file, school quality, and childhood family resources. Therefore, the preferred estimate should be interpreted as a doubly robust selection-on-observables estimate, not as a definitive natural-experiment estimate. The weak-IV diagnostic also shows why it would be misleading to claim a strong expansion-based causal result from this cross-section alone.
 
 \section{Conclusion}
 
-Using CFPS 2022 data, this paper finds a robust positive relationship between education and adult income in China. In the preferred model, one more year of education is associated with approximately 8.8 percent higher wage income after controlling for demographic factors and province fixed effects. The evidence supports the view that education is closely linked to labor-market advantage, but the cross-sectional design means the estimate should not be read as a definitive causal return to schooling.
+Using CFPS 2022, this paper finds a large positive education-income relationship among Chinese adults. The conventional Mincer coefficient is about 0.088 per year of schooling. More importantly, the preferred AIPW estimate suggests that completing college or above is associated with roughly 0.71 log points higher wage income after balancing observed covariates. The estimate is robust across alternative nuisance models and covariate sets, and balance diagnostics show substantial improvement after weighting. The paper therefore provides a more innovative and empirically careful account than a pure OLS design, while maintaining appropriate caution about causal interpretation.
 
 \bibliographystyle{plainnat}
 \bibliography{references}
