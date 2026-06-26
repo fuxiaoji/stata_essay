@@ -22,13 +22,13 @@
 
 \title{Does Education Raise Adult Income in China?\\Data Audit, Doubly Robust Evidence, and Weak-IV Diagnostics from CFPS 2022}
 \author{Empirical Essay}
-\date{June 25, 2026}
+\date{June 26, 2026}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-This paper studies the relationship between education and adult income in China using CFPS 2022 microdata. Rather than relying only on a Mincer regression, the analysis first checks sample selection, missingness, wage outliers, and propensity-score overlap. It then treats college-or-above education as the main treatment and estimates its average treatment effect with cross-fitted augmented inverse probability weighting (AIPW). The paper also examines whether China's 1999 higher-education expansion generates a usable cohort-level instrument in this sample by reporting first-stage diagnostics. The final analytic sample contains 4,699 working-age adults. OLS estimates show that one additional year of schooling is associated with 8.8 percent higher wage income, while college-or-above education is associated with about 0.74 log points higher wage income. The preferred AIPW estimate is 0.710 log points, and alternative specifications range from 0.669 to 0.773. After weighting, standardized differences in age, gender, hukou status, urban residence, marriage, and medical insurance fall substantially. The expansion variable has a weak first stage in narrow cohort windows, so it is not used as the main causal evidence. Overall, the results show a stable positive education-income relationship; after balancing observed characteristics, college-or-above education remains strongly associated with higher wages.
+This paper studies the relationship between education and adult income in China using CFPS 2022 microdata. Rather than relying only on a Mincer regression, the analysis first checks sample selection, missingness, wage outliers, and propensity-score overlap. It then treats college-or-above education as the main treatment and estimates its average treatment effect with cross-fitted augmented inverse probability weighting (AIPW). The paper also examines whether China's 1999 higher-education expansion generates a usable cohort-level instrument in this sample by reporting first-stage diagnostics. The final analytic sample contains 4,699 working-age adults. In the OLS benchmark, one additional year of schooling has a coefficient of 0.0882 on $\ln(\mathrm{wage}+1)$, which equals a 9.22 percent difference in $\mathrm{wage}+1$ using the exact transformation $\exp(\beta)-1$. College-or-above education has an OLS coefficient of 0.7405, or 109.7 percent after the same transformation. The preferred AIPW estimate is 0.7154, and alternative specifications range from 0.6859 to 0.7730. After weighting, standardized differences in age, gender, hukou status, urban residence, and marriage fall substantially. The expansion variable has a weak first stage in narrow cohort windows, so it is not used as the main causal evidence. Overall, the results show a stable positive education-income relationship; after balancing observed characteristics, college-or-above education remains strongly associated with higher wages.
 \end{abstract}
 
 \noindent\textbf{Keywords:} education, income, CFPS, China, AIPW, causal inference, higher-education expansion
@@ -51,7 +51,7 @@ The main causal framework is selection on observables. AIPW combines an outcome 
 
 \section{Data and Audit}
 
-The data come from CFPS 2022 \citep{xie2015sampling, cfps2022data}. The initial file has 9,806 observations. To keep the income outcome comparable across respondents, the analytic sample is limited to adults aged 18--64 with observed wage income and complete core controls. Table~\ref{tab:flow} reports the sample flow.
+The data come from CFPS 2022, released by the Institute of Social Science Survey at Peking University \citep{xie2015sampling, cfps2022data}. The initial file has 9,806 observations. To keep the income outcome comparable across respondents, the analytic sample is limited to adults aged 18--64 with observed wage income and complete core controls. Table~\ref{tab:flow} reports the sample flow.
 
 \begin{table}[H]
 \centering
@@ -64,7 +64,7 @@ The main outcome is $\ln(\mathrm{wage}+1)$. The continuous education variable is
 
 \begin{table}[H]
 \centering
-\caption{Missingness Audit in the Source Data}
+\caption{Missingness Audit in the Raw Data}
 \label{tab:missing}
 \input{tables/table_missing_audit.tex}
 \end{table}
@@ -97,6 +97,31 @@ The main outcome is $\ln(\mathrm{wage}+1)$. The continuous education variable is
 \label{fig:wageedu}
 \end{figure}
 
+Table~\ref{tab:eduslope} and Figure~\ref{fig:eduslope} make the slope between adjacent education levels explicit. The slope is not read as a log-point approximation. It is calculated as the change in mean $\ln(\mathrm{wage}+1)$ divided by the change in mean years of schooling between neighboring education categories, and the final column reports the exact transformation $\exp(\Delta)-1$. The gradient is especially steep from high school to college, from college to bachelor, and from bachelor to master.
+
+\begin{table}[H]
+\centering
+\caption{Adjacent Income Slopes Across Education Levels}
+\label{tab:eduslope}
+\resizebox{\textwidth}{!}{\input{tables/table_education_slopes.tex}}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.86\textwidth]{figures/viz_education_adjacent_slopes.png}
+\caption{Adjacent education-income slopes with point labels}
+\label{fig:eduslope}
+\end{figure}
+
+The working file only contains a binary \texttt{job} variable. It does not separate full-time work, part-time work, and non-employment, and it does not contain hours worked, so an hourly-wage outcome cannot be constructed without adding information that is not in the data. Table~\ref{tab:employment} reports the available employment-status measure, while the robustness checks include a positive-wage sample.
+
+\begin{table}[H]
+\centering
+\caption{Employment-Status Measure in the Working Data}
+\label{tab:employment}
+\input{tables/table_employment_scope.tex}
+\end{table}
+
 \section{Empirical Strategy}
 
 \subsection{OLS Benchmark}
@@ -120,7 +145,7 @@ The AIPW score is
 +\frac{D_i(Y_i-\hat{m}_1(X_i))}{\hat{e}(X_i)}
 -\frac{(1-D_i)(Y_i-\hat{m}_0(X_i))}{1-\hat{e}(X_i)},
 \end{equation}
-where $D_i$ indicates college-or-above education, $\hat{e}(X_i)$ is the estimated propensity score, and $\hat{m}_d(X_i)$ is the predicted outcome under treatment status $d$. Five-fold cross-fitting is used so that the nuisance models are not trained and evaluated on exactly the same observations. The paper reports both linear and gradient-boosting nuisance models. The preferred specification uses age, gender, hukou, urban residence, marriage, medical insurance, and province. Extended specifications add health, household size, social status, internet use, and employment status as sensitivity controls.
+where $D_i$ indicates college-or-above education, $\hat{e}(X_i)$ is the estimated propensity score, and $\hat{m}_d(X_i)$ is the predicted outcome under treatment status $d$. Five-fold cross-fitting is used so that the nuisance models are not trained and evaluated on exactly the same observations. The paper reports both linear and gradient-boosting nuisance models. The preferred specification uses age, gender, hukou, urban residence, marriage, and province. Extended specifications add health, household size, social status, internet use, and employment status as sensitivity controls.
 
 \subsection{Expansion-Based IV Diagnostic}
 
@@ -130,7 +155,7 @@ China's higher-education expansion began in 1999. A natural idea is to use cohor
 
 \subsection{OLS Benchmarks}
 
-Table~\ref{tab:reg} reports the OLS benchmarks. One additional year of schooling is associated with 0.088 log points higher wage income in the basic specification and 0.083 log points in the richer specification. When education is measured as college-or-above completion, the coefficient is 0.738 in the basic specification and 0.694 with richer controls. The estimates remain positive across definitions of education and income, suggesting that the education-income gradient is not an artifact of one particular specification.
+Table~\ref{tab:reg} reports the OLS benchmarks. One additional year of schooling has a coefficient of 0.0882 in the basic specification, which equals a 9.22 percent difference in $\mathrm{wage}+1$ after the exact transformation. With richer controls, the coefficient is 0.0824, or 8.59 percent. When education is measured as college-or-above completion, the coefficient is 0.7405 in the basic specification, or 109.7 percent after transformation; with richer controls, it is 0.6949, or 100.4 percent. The estimates remain positive across definitions of education and income, suggesting that the education-income gradient is not an artifact of one particular specification.
 
 \begin{table}[H]
 \centering
@@ -138,7 +163,7 @@ Table~\ref{tab:reg} reports the OLS benchmarks. One additional year of schooling
 \label{tab:reg}
 \input{tables/table_regression_education_returns.tex}
 \begin{flushleft}
-\footnotesize Notes: Robust standard errors are in parentheses. Basic controls include age, age squared, gender, marriage, rural hukou, medical insurance, and province fixed effects. Rich controls additionally include urban residence, health, household size, internet use, and subjective social status. $^{*}p<0.10$, $^{**}p<0.05$, $^{***}p<0.01$.
+\footnotesize Notes: Robust standard errors are in parentheses. Basic controls include age, age squared, gender, marriage, rural hukou, and province fixed effects. Rich controls additionally include urban residence, health, household size, internet use, and subjective social status. $^{*}p<0.10$, $^{**}p<0.05$, $^{***}p<0.01$.
 \end{flushleft}
 \end{table}
 
@@ -151,7 +176,7 @@ Table~\ref{tab:reg} reports the OLS benchmarks. One additional year of schooling
 
 \subsection{Doubly Robust Estimates}
 
-Table~\ref{tab:aipw} reports the AIPW results. The preferred core-plus GBM estimate is 0.710 log points with a standard error of 0.056. Across six specifications, estimates range from 0.669 to 0.773 log points. These estimates are slightly smaller than the OLS college coefficient but still large, which suggests that the college-income premium remains visible after balancing observed differences between the two education groups.
+Table~\ref{tab:aipw} reports the AIPW results. The preferred core-plus GBM estimate is 0.7154 with a standard error of 0.0570; the exact transformation gives a 104.5 percent difference in $\mathrm{wage}+1$ for college-or-above education. Across six specifications, estimates range from 0.6859 to 0.7730. These estimates are slightly smaller than the OLS college coefficient but still large, which suggests that the college-income premium remains visible after balancing observed differences between the two education groups.
 
 \begin{table}[H]
 \centering
@@ -233,7 +258,7 @@ The main limitation is that AIPW still depends on observed covariates. CFPS 2022
 
 \section{Conclusion}
 
-Using CFPS 2022, this paper finds a large positive education-income relationship among Chinese adults. The conventional Mincer coefficient is about 0.088 per year of schooling. In the AIPW framework, completing college or above is associated with roughly 0.71 log points higher wage income after balancing observed covariates. The estimate is stable across alternative nuisance models and covariate sets, and the balance diagnostics improve after weighting. A cautious reading is that, within the limits of the observed data, higher education remains closely linked to higher wages. Stronger causal claims would require a cleaner policy shock, panel evidence, or richer measures of family background and ability.
+Using CFPS 2022, this paper finds a large positive education-income relationship among Chinese adults. The conventional Mincer coefficient is 0.0882 per year of schooling, which corresponds to a 9.22 percent difference in $\mathrm{wage}+1$ using $\exp(\beta)-1$. In the AIPW framework, the preferred estimate for completing college or above is 0.7154, or 104.5 percent after the same exact transformation. The estimate is stable across alternative nuisance models and covariate sets, and the balance diagnostics improve after weighting. A cautious reading is that, within the limits of the observed data, higher education remains closely linked to higher wages. Stronger causal claims would require a cleaner policy shock, panel evidence, or richer measures of family background and ability.
 
 \bibliographystyle{plainnat}
 \bibliography{references}

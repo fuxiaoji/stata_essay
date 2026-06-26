@@ -169,7 +169,7 @@ def load_and_prepare() -> tuple[pd.DataFrame, pd.DataFrame, dict[str, object]]:
     df["wage_w"] = df["wage"].clip(lo, hi)
     df["lnwage_w"] = np.where(df["wage_w"].ge(0) & df["wage_w"].notna(), np.log(df["wage_w"] + 1), np.nan)
 
-    core = ["lnwage", "educ", "college", "age_", "age2", "gen", "mar", "rural", "medsure_dum", "provcd"]
+    core = ["lnwage", "educ", "college", "age_", "age2", "gen", "mar", "rural", "provcd"]
     analytic = df[df["age_"].between(18, 64)].copy()
     after_age = len(analytic)
     analytic = analytic[analytic["wage"].notna()].copy()
@@ -194,7 +194,6 @@ def load_and_prepare() -> tuple[pd.DataFrame, pd.DataFrame, dict[str, object]]:
         "rural",
         "urban",
         "hukou",
-        "medsure_dum",
         "edu",
         "educ",
         "college",
@@ -228,7 +227,7 @@ def load_and_prepare() -> tuple[pd.DataFrame, pd.DataFrame, dict[str, object]]:
 
 def sample_audit_outputs(source: pd.DataFrame, df: pd.DataFrame, audit: dict[str, object]) -> None:
     flow_rows = [
-        ["Raw CFPS 2022 source file", f"{audit['source_n']:,}", ""],
+        ["Raw CFPS 2022 data file", f"{audit['source_n']:,}", ""],
         ["Keep adults aged 18--64", f"{audit['after_age_18_64']:,}", "Age restriction"],
         ["Require wage variable observed", f"{audit['after_nonmissing_wage']:,}", "Outcome available"],
         ["Require core variables complete", f"{audit['final_core_complete']:,}", "Final analytic sample"],
@@ -325,9 +324,76 @@ def summary_outputs(df: pd.DataFrame) -> dict[str, object]:
     return {"education_counts": edu_counts}
 
 
+def education_slope_outputs(df: pd.DataFrame) -> pd.DataFrame:
+    slopes = (
+        df.groupby("edu")
+        .agg(
+            n=("pid", "size"),
+            mean_educ=("educ", "mean"),
+            mean_lnwage=("lnwage", "mean"),
+        )
+        .reset_index()
+        .sort_values("edu")
+    )
+    slopes["label"] = slopes["edu"].map(EDU_LABELS)
+    slopes["label_zh"] = slopes["edu"].map(EDU_LABELS_ZH)
+    slopes["delta_lnwage"] = slopes["mean_lnwage"].diff()
+    slopes["delta_educ"] = slopes["mean_educ"].diff()
+    slopes["adjacent_slope"] = slopes["delta_lnwage"] / slopes["delta_educ"]
+    slopes["exact_change_pct"] = 100 * (np.exp(slopes["adjacent_slope"]) - 1)
+
+    rows = []
+    rows_zh = []
+    for row in slopes.itertuples():
+        slope = "--" if pd.isna(row.adjacent_slope) else f"{row.adjacent_slope:.4f}"
+        exact = "--" if pd.isna(row.exact_change_pct) else f"{row.exact_change_pct:.2f}"
+        rows.append([row.label, f"{int(row.n):,}", f"{row.mean_educ:.2f}", f"{row.mean_lnwage:.3f}", slope, exact])
+        rows_zh.append([row.label_zh, f"{int(row.n):,}", f"{row.mean_educ:.2f}", f"{row.mean_lnwage:.3f}", slope, exact])
+
+    write_tex_table(
+        TAB / "table_education_slopes.tex",
+        ["Education level", "N", "Mean years", "Mean ln(wage+1)", "Adjacent slope", "Exact change (\\%)"],
+        rows,
+        "lrrrrr",
+    )
+    write_tex_table(
+        TAB / "table_education_slopes_zh.tex",
+        ["教育层级", "样本量", "平均年限", "平均ln(工资+1)", "相邻斜率", "精确变化(\\%)"],
+        rows_zh,
+        "lrrrrr",
+    )
+    slopes.to_csv(TAB / "education_adjacent_slopes.csv", index=False)
+    return slopes
+
+
+def employment_scope_outputs(df: pd.DataFrame) -> pd.DataFrame:
+    labels = {0: "job = 0", 1: "job = 1"}
+    labels_zh = {0: "job = 0", 1: "job = 1"}
+    work = df.dropna(subset=["job"]).copy()
+    grouped = (
+        work.groupby("job")
+        .agg(n=("pid", "size"), mean_wage=("wage", "mean"), mean_lnwage=("lnwage", "mean"))
+        .reset_index()
+        .sort_values("job")
+    )
+    grouped["share"] = 100 * grouped["n"] / len(work)
+    rows = [
+        [labels.get(int(row.job), str(row.job)), f"{int(row.n):,}", f"{row.share:.2f}", f"{row.mean_wage:.2f}", f"{row.mean_lnwage:.3f}"]
+        for row in grouped.itertuples()
+    ]
+    rows_zh = [
+        [labels_zh.get(int(row.job), str(row.job)), f"{int(row.n):,}", f"{row.share:.2f}", f"{row.mean_wage:.2f}", f"{row.mean_lnwage:.3f}"]
+        for row in grouped.itertuples()
+    ]
+    write_tex_table(TAB / "table_employment_scope.tex", ["Status", "N", "Percent", "Mean wage", "Mean ln(wage+1)"], rows, "lrrrr")
+    write_tex_table(TAB / "table_employment_scope_zh.tex", ["状态", "样本量", "占比(\\%)", "平均工资", "平均ln(工资+1)"], rows_zh, "lrrrr")
+    grouped.to_csv(TAB / "employment_scope.csv", index=False)
+    return grouped
+
+
 def regression_outputs(df: pd.DataFrame) -> dict[str, object]:
-    basic = "age_ + age2 + gen + mar + rural + medsure_dum + C(provcd)"
-    rich = "age_ + age2 + gen + mar + rural + medsure_dum + urban + health + size + inter + dw + C(provcd)"
+    basic = "age_ + age2 + gen + mar + rural + C(provcd)"
+    rich = "age_ + age2 + gen + mar + rural + urban + health + size + inter + dw + C(provcd)"
     formulas = {
         "Years, basic controls": f"lnwage ~ educ + {basic}",
         "Years, rich controls": f"lnwage ~ educ + {rich}",
@@ -337,7 +403,7 @@ def regression_outputs(df: pd.DataFrame) -> dict[str, object]:
         "Positive wage only": f"lnwage ~ college + {basic}",
     }
     data_for_model = {
-        name: df.dropna(subset=["lnwage", "lnwage_w", "college", "educ", "age_", "age2", "gen", "mar", "rural", "medsure_dum", "provcd"])
+        name: df.dropna(subset=["lnwage", "lnwage_w", "college", "educ", "age_", "age2", "gen", "mar", "rural", "provcd"])
         for name in formulas
     }
     data_for_model["Positive wage only"] = data_for_model["Positive wage only"].query("wage > 0")
@@ -368,8 +434,8 @@ def regression_outputs(df: pd.DataFrame) -> dict[str, object]:
             }
         )
 
-    write_tex_table(TAB / "table_regression_education_returns.tex", ["Model", "Coefficient", "Robust SE", "N", "$R^2$"], rows, "lrrrr")
-    write_tex_table(TAB / "table_regression_education_returns_zh.tex", ["模型", "系数", "稳健标准误", "样本量", "$R^2$"], rows_zh, "lrrrr")
+    write_tex_table(TAB / "table_regression_education_returns.tex", ["Specification", "Coefficient", "Robust SE", "N", "$R^2$"], rows, "lrrrr")
+    write_tex_table(TAB / "table_regression_education_returns_zh.tex", ["估计设定", "系数", "稳健标准误", "样本量", "$R^2$"], rows_zh, "lrrrr")
     pd.DataFrame(coef_rows).to_csv(TAB / "model_coefficients.csv", index=False)
     return {"models": results, "coef_rows": coef_rows}
 
@@ -462,8 +528,8 @@ def standardized_mean_difference(values: np.ndarray, treatment: np.ndarray, weig
 def causal_outputs(df: pd.DataFrame) -> dict[str, object]:
     specs = {
         "Core": ["age_", "gen", "rural", "provcd", "urban"],
-        "Core plus": ["age_", "gen", "rural", "provcd", "urban", "mar", "medsure_dum"],
-        "Extended": ["age_", "gen", "rural", "provcd", "urban", "mar", "medsure_dum", "health", "size", "dw", "inter", "job"],
+        "Core plus": ["age_", "gen", "rural", "provcd", "urban", "mar"],
+        "Extended": ["age_", "gen", "rural", "provcd", "urban", "mar", "health", "size", "dw", "inter", "job"],
     }
     results: list[AIPWResult] = []
     main_diag: pd.DataFrame | None = None
@@ -493,7 +559,7 @@ def causal_outputs(df: pd.DataFrame) -> dict[str, object]:
     assert main_diag is not None
     t = main_diag["college"].to_numpy()
     weights = main_diag["weight"].to_numpy()
-    balance_vars = ["age_", "gen", "rural", "urban", "mar", "medsure_dum"]
+    balance_vars = ["age_", "gen", "rural", "urban", "mar"]
     bal_rows = []
     for var in balance_vars:
         values = main_diag[var].to_numpy(dtype=float)
@@ -508,18 +574,18 @@ def causal_outputs(df: pd.DataFrame) -> dict[str, object]:
 
 
 def iv_diagnostics(df: pd.DataFrame) -> list[dict[str, object]]:
-    controls = "gen + mar + rural + medsure_dum + C(provcd)"
+    controls = "gen + mar + rural + C(provcd)"
     rows: list[list[object]] = []
     rows_zh: list[list[object]] = []
     out: list[dict[str, object]] = []
     for bw in [5, 7, 9, 12, 15, 20]:
-        d = df.dropna(subset=["lnwage", "educ", "college", "running", "post1981", "gen", "mar", "rural", "medsure_dum", "provcd"]).copy()
+        d = df.dropna(subset=["lnwage", "educ", "college", "running", "post1981", "gen", "mar", "rural", "provcd"]).copy()
         d = d[d["running"].abs() <= bw]
         fs = smf.ols(f"educ ~ post1981 + running + post1981:running + {controls}", d).fit(cov_type="HC1")
         fstat = float(fs.tvalues["post1981"] ** 2)
         try:
             iv = IV2SLS.from_formula(
-                "lnwage ~ 1 + running + post1981:running + gen + mar + rural + medsure_dum + C(provcd) + [educ ~ post1981]",
+                "lnwage ~ 1 + running + post1981:running + gen + mar + rural + C(provcd) + [educ ~ post1981]",
                 d,
             ).fit(cov_type="robust")
             iv_beta = float(iv.params["educ"])
@@ -553,7 +619,7 @@ def heterogeneity_outputs(df: pd.DataFrame) -> list[dict[str, float | str]]:
     ]
     rows: list[list[object]] = []
     coef_rows: list[dict[str, float | str]] = []
-    formula = "lnwage ~ educ + age_ + age2 + mar + medsure_dum + C(provcd)"
+    formula = "lnwage ~ educ + age_ + age2 + mar + C(provcd)"
     for label, subdf in groups:
         res = fit_model(subdf, formula)
         beta = float(res.params["educ"])
@@ -635,6 +701,32 @@ def figure_wage_by_education(df: pd.DataFrame) -> None:
     ax.grid(axis="y", alpha=0.2)
     fig.tight_layout()
     fig.savefig(FIG / "viz_wage_by_education.png", bbox_inches="tight")
+    plt.close(fig)
+
+
+def figure_education_slopes(slopes: pd.DataFrame) -> None:
+    data = slopes.dropna(subset=["adjacent_slope"]).copy()
+    fig, ax = plt.subplots(figsize=(8.8, 5.2))
+    x = np.arange(len(data))
+    ax.plot(x, data["adjacent_slope"], marker="o", markersize=8, linewidth=2.3, color="#1E6091")
+    ax.axhline(0, color="#6B7280", linewidth=1.0, linestyle="--")
+    for idx, row in enumerate(data.itertuples()):
+        ax.annotate(
+            f"{row.adjacent_slope:.3f}",
+            (idx, row.adjacent_slope),
+            textcoords="offset points",
+            xytext=(0, 9 if row.adjacent_slope >= 0 else -16),
+            ha="center",
+            fontsize=9,
+            color="#111827",
+        )
+    ax.set_xticks(x)
+    ax.set_xticklabels(data["label"], rotation=25, ha="right")
+    ax.set_ylabel("Adjacent slope in mean ln(wage + 1)")
+    ax.set_title("Adjacent Income Slope by Education Level")
+    ax.grid(axis="y", alpha=0.2)
+    fig.tight_layout()
+    fig.savefig(FIG / "viz_education_adjacent_slopes.png", bbox_inches="tight")
     plt.close(fig)
 
 
@@ -738,6 +830,8 @@ def main() -> None:
     source, df, audit = load_and_prepare()
     sample_audit_outputs(source, df, audit)
     summary = summary_outputs(df)
+    slopes = education_slope_outputs(df)
+    employment_scope_outputs(df)
     regressions = regression_outputs(df)
     causal = causal_outputs(df)
     iv = iv_diagnostics(df)
@@ -745,6 +839,7 @@ def main() -> None:
 
     figure_education_distribution(summary["education_counts"])
     figure_wage_by_education(df)
+    figure_education_slopes(slopes)
     figure_coefficients(regressions["coef_rows"])
     figure_heterogeneity(heterogeneity)
     figure_propensity(causal["main_diag"])
